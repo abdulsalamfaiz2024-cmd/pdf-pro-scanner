@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oqba — Full Production Implementation Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --bg: #06070d;
+  --surface: #0d0f1a;
+  --surface2: #111422;
+  --surface3: #161928;
+  --border: #1e2235;
+  --border2: #252a42;
+
+  --green: #00b073;
+  --green-dim: rgba(0,176,115,0.12);
+  --green-border: rgba(0,176,115,0.25);
+
+  --amber: #f2a33a;
+  --amber-dim: rgba(242,163,58,0.1);
+  --amber-border: rgba(242,163,58,0.25);
+
+  --red: #e8354d;
+  --red-dim: rgba(232,53,77,0.1);
+  --red-border: rgba(232,53,77,0.25);
+
+  --blue: #3d7ef5;
+  --blue-dim: rgba(61,126,245,0.1);
+  --blue-border: rgba(61,126,245,0.25);
+
+  --purple: #9f6ef5;
+  --purple-dim: rgba(159,110,245,0.1);
+
+  --text: #d8daf0;
+  --text2: #8890b0;
+  --text3: #555d7a;
+  --code: #c5e8c0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14.5px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── COVER ── */
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 64px;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.cover-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(30,34,53,0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,34,53,0.4) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+}
+
+.cover-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,176,115,0.08) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cover-inner { position: relative; max-width: 900px; }
+
+.doc-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--green);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.doc-label::before {
+  content: '';
+  width: 28px; height: 1px;
+  background: var(--green);
+}
+
+.cover-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(44px, 7vw, 80px);
+  line-height: 1.05;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.cover-title .accent { color: var(--green); }
+.cover-title .dim { color: var(--text3); font-style: italic; font-weight: 400; font-size: 0.6em; display: block; margin-top: 8px; }
+
+.cover-desc {
+  max-width: 560px;
+  color: var(--text2);
+  font-size: 15.5px;
+  line-height: 1.65;
+  margin-top: 24px;
+}
+
+.cover-stats {
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  gap: 0;
+  margin-top: 52px;
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.stat-cell {
+  padding: 18px 28px;
+  border-right: 1px solid var(--border2);
+  text-align: center;
+}
+.stat-cell:last-child { border-right: none; }
+
+.stat-num {
+  font-family: 'Fira Code', monospace;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-num.green { color: var(--green); }
+.stat-num.amber { color: var(--amber); }
+.stat-num.blue { color: var(--blue); }
+.stat-num.purple { color: var(--purple); }
+.stat-num.red { color: var(--red); }
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+}
+
+/* ── LAYOUT ── */
+.page { max-width: 1080px; margin: 0 auto; padding: 0 64px; }
+
+/* ── SECTIONS ── */
+.section { padding: 72px 0; border-bottom: 1px solid var(--border); }
+.section:last-child { border-bottom: none; }
+
+.section-header { margin-bottom: 48px; }
+
+.section-eyebrow {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text3);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-eyebrow .num {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: var(--text2);
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.section-lead {
+  color: var(--text2);
+  font-size: 15px;
+  margin-top: 12px;
+  max-width: 680px;
+  line-height: 1.7;
+}
+
+/* ── ALERT BOXES ── */
+.alert {
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 20px 0;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.alert-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alert-body {}
+
+.alert-title {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.alert-text { font-size: 13.5px; line-height: 1.65; }
+
+.alert.critical { background: var(--red-dim); border: 1px solid var(--red-border); }
+.alert.critical .alert-title { color: var(--red); }
+
+.alert.warning { background: var(--amber-dim); border: 1px solid var(--amber-border); }
+.alert.warning .alert-title { color: var(--amber); }
+
+.alert.info { background: var(--blue-dim); border: 1px solid var(--blue-border); }
+.alert.info .alert-title { color: var(--blue); }
+
+.alert.success { background: var(--green-dim); border: 1px solid var(--green-border); }
+.alert.success .alert-title { color: var(--green); }
+
+/* ── PHASE HEADER ── */
+.phase {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.phase-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  padding: 3px 10px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.phase-tag.phase1 { background: rgba(61,126,245,0.15); color: var(--blue); border: 1px solid var(--blue-border); }
+.phase-tag.phase2 { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+.phase-tag.phase3 { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-border); }
+.phase-tag.phase4 { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(159,110,245,0.25); }
+
+.phase-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.phase-goal {
+  color: var(--text2);
+  font-size: 12.5px;
+  margin-left: auto;
+  font-family: 'Fira Code', monospace;
+}
+
+.phase-body { padding: 24px; }
+
+/* ── CODE BLOCKS ── */
+pre {
+  background: #060810;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 18px 20px;
+  overflow-x: auto;
+  margin: 16px 0;
+  font-family: 'Fira Code', monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--code);
+}
+
+.code-filename {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--text3);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  padding: 6px 14px;
+  border-radius: 6px 6px 0 0;
+  display: inline-block;
+  margin-bottom: -1px;
+}
+
+code {
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--amber);
+}
+
+/* ── TABLES ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 13px;
+}
+
+.data-table th {
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text3);
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border2);
+  background: var(--surface2);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  vertical-align: top;
+}
+
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--surface); }
+
+/* ── FEATURE GRID ── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 24px 0;
+}
+
+.feature-card {
+  background: var(--surface);
+  padding: 22px;
+}
+
+.feature-icon {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.feature-name {
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.feature-desc {
+  font-size: 12.5px;
+  color: var(--text2);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.feature-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+
+.fb-new { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+.fb-pro { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-border); }
+.fb-stub { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border); }
+.fb-extend { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue-border); }
+
+/* ── FILE TREE ── */
+.file-tree {
+  background: #060810;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 20px 24px;
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  line-height: 2;
+  margin: 20px 0;
+}
+
+.ft-new { color: var(--green); }
+.ft-extend { color: var(--blue); }
+.ft-existing { color: var(--text3); }
+.ft-dir { color: var(--text2); font-weight: 500; }
+.ft-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.ft-badge.new { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+.ft-badge.ext { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue-border); }
+.ft-badge.pro { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-border); }
+
+/* ── STEPS ── */
+.step-list { display: flex; flex-direction: column; gap: 16px; margin: 20px 0; }
+
+.step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+.step-content {}
+.step-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.step-detail { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* ── INLINE HIGHLIGHT ── */
+.hl { color: var(--green); font-weight: 600; }
+.hl-amber { color: var(--amber); font-weight: 600; }
+.hl-red { color: var(--red); font-weight: 600; }
+.hl-blue { color: var(--blue); font-weight: 600; }
+
+/* ── RULE BLOCK ── */
+.rule-block {
+  border-left: 3px solid var(--green);
+  background: var(--green-dim);
+  padding: 14px 18px;
+  margin: 16px 0;
+  border-radius: 0 6px 6px 0;
+  font-size: 13.5px;
+}
+
+.rule-block.amber { border-color: var(--amber); background: var(--amber-dim); }
+.rule-block.red { border-color: var(--red); background: var(--red-dim); }
+.rule-block.blue { border-color: var(--blue); background: var(--blue-dim); }
+
+.rule-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+  color: var(--green);
+}
+.rule-block.amber .rule-label { color: var(--amber); }
+.rule-block.red .rule-label { color: var(--red); }
+.rule-block.blue .rule-label { color: var(--blue); }
+
+/* ── TWO-COL ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+
+/* ── CHECK LIST ── */
+.check-list { list-style: none; margin: 16px 0; display: flex; flex-direction: column; gap: 8px; }
+.check-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  color: var(--text2);
+  line-height: 1.55;
+}
+.check-list li::before {
+  content: '□';
+  font-family: 'Fira Code', monospace;
+  color: var(--border2);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── DEPENDENCY PILL ── */
+.dep-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--text2);
+  margin: 3px;
+}
+
+.dep-pill .dep-action {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.dep-pill .new { background: var(--green-dim); color: var(--green); }
+.dep-pill .keep { background: var(--surface); color: var(--text3); border: 1px solid var(--border); }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border2), transparent);
+  margin: 28px 0;
+}
+
+/* ── ANIMATION ── */
+.section { animation: fadeUp 0.5s ease both; }
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.1s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.2s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+.section:nth-child(6) { animation-delay: 0.3s; }
+.section:nth-child(7) { animation-delay: 0.35s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+p { color: var(--text2); margin-bottom: 12px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--text); }
+
+@media (max-width: 768px) {
+  .cover { padding: 60px 24px; }
+  .page { padding: 0 24px; }
+  .cover-stats { grid-template-columns: repeat(3, auto); }
+  .feature-grid { grid-template-columns: 1fr 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ COVER ═══ -->
+<div class="cover">
+  <div class="cover-grid"></div>
+  <div class="cover-glow"></div>
+  <div class="cover-inner">
+    <div class="doc-label">Agent Implementation Brief · Production Roadmap</div>
+
+    <h1 class="cover-title">
+      <span>Oqba <span class="accent">عُقبة</span></span>
+      <span class="dim">MVP → Full Production PDF Ecosystem</span>
+    </h1>
+
+    <p class="cover-desc">
+      This document is the authoritative technical specification for the AI agent to implement the complete Oqba feature set. The MVP core (Scanner + Merge) is confirmed complete. This plan covers all remaining features, services, UI pages, shared infrastructure, routing, and validation — sequenced for maximum parallel execution.
+    </p>
+
+    <div class="cover-stats">
+      <div class="stat-cell">
+        <div class="stat-num green">11</div>
+        <div class="stat-label">New Features</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num blue">6</div>
+        <div class="stat-label">New Services</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num purple">13</div>
+        <div class="stat-label">New UI Pages</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num amber">2</div>
+        <div class="stat-label">PRO Features</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num red">1</div>
+        <div class="stat-label">Security Stub</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="page">
+
+  <!-- ══ SECTION 1: WHAT'S BUILT ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-eyebrow"><span class="num">01</span> Foundation Status</div>
+      <h2 class="section-title">Confirmed MVP Foundation</h2>
+      <p class="section-lead">The agent must treat these as immutable infrastructure. Do not refactor, reorganize, or rename. All new code integrates around this foundation.</p>
+    </div>
+
+    <div class="alert success">
+      <span class="alert-icon">✓</span>
+      <div class="alert-body">
+        <div class="alert-title">Already Built & Working</div>
+        <div class="alert-text">
+          <strong>Services:</strong> <code>scanner_service.dart</code>, <code>pdf_service.dart</code> (merge + imagesToPdf), <code>file_service.dart</code><br>
+          <strong>Pages:</strong> home_page, tools_page, scanner_page, merge_page, settings_page, premium_page<br>
+          <strong>Widgets:</strong> offline_indicator, speed_receipt, skeleton_loader, bottom_nav<br>
+          <strong>Stack:</strong> syncfusion_flutter_pdf, syncfusion_flutter_pdfviewer, google_mlkit_document_scanner, file_picker, path_provider, haptic_feedback, permission_handler, share_plus
+        </div>
+      </div>
+    </div>
+
+    <div class="alert warning">
+      <span class="alert-icon">⚠</span>
+      <div class="alert-body">
+        <div class="alert-title">Critical Integration Rule</div>
+        <div class="alert-text">All new pages <strong>must</strong> use the existing <code>SpeedReceipt</code> widget for operation results, the <code>OfflineIndicator</code> in the AppBar, and the standard <code>AppDocuments/Oqba/documents/</code> file contract. Do not deviate from the established pattern.</div>
+      </div>
+    </div>
+
+    <div class="file-tree">
+<span class="ft-dir">lib/</span><br>
+├── <span class="ft-dir">services/</span><br>
+│   ├── <span class="ft-existing">scanner_service.dart</span> <span class="ft-badge">existing</span><br>
+│   ├── <span class="ft-extend">pdf_service.dart</span> <span class="ft-badge ext">EXTEND</span> ← add split, extract pages, delete, rotate, reorder<br>
+│   ├── <span class="ft-new">convert_service.dart</span> <span class="ft-badge new">NEW</span> ← pdf→images, ocr<br>
+│   ├── <span class="ft-new">extract_service.dart</span> <span class="ft-badge new">NEW</span> ← extract images, extract text<br>
+│   ├── <span class="ft-new">compress_service.dart</span> <span class="ft-badge new">NEW</span> <span class="ft-badge pro">PRO</span><br>
+│   └── <span class="ft-new">security_service.dart</span> <span class="ft-badge new">STUB</span><br>
+├── <span class="ft-dir">pages/</span><br>
+│   ├── <span class="ft-existing">home_page.dart, tools_page.dart, etc.</span> <span class="ft-badge">existing</span><br>
+│   ├── <span class="ft-dir">organize/</span><br>
+│   │   ├── <span class="ft-new">split_page.dart</span> <span class="ft-badge new">NEW</span><br>
+│   │   ├── <span class="ft-new">extract_pages_page.dart</span> <span class="ft-badge new">NEW</span><br>
+│   │   ├── <span class="ft-new">reorder_pages_page.dart</span> <span class="ft-badge new">NEW</span><br>
+│   │   ├── <span class="ft-new">delete_pages_page.dart</span> <span class="ft-badge new">NEW</span><br>
+│   │   └── <span class="ft-new">rotate_pages_page.dart</span> <span class="ft-badge new">NEW</span><br>
+│   ├── <span class="ft-dir">convert/</span><br>
+│   │   ├── <span class="ft-new">pdf_to_images_page.dart</span> <span class="ft-badge new">NEW</span><br>
+│   │   ├── <span class="ft-new">images_to_pdf_page.dart</span> <span class="ft-badge new">NEW</span><br>
+│   │   └── <span class="ft-new">ocr_page.dart</span> <span class="ft-badge new">NEW</span> <span class="ft-badge pro">PRO</span><br>
+│   ├── <span class="ft-dir">extract_optimize/</span><br>
+│   │   ├── <span class="ft-new">extract_images_page.dart</span> <span class="ft-badge new">NEW</span><br>
+│   │   ├── <span class="ft-new">extract_text_page.dart</span> <span class="ft-badge new">NEW</span><br>
+│   │   └── <span class="ft-new">compress_page.dart</span> <span class="ft-badge new">NEW</span> <span class="ft-badge pro">PRO</span><br>
+│   └── <span class="ft-dir">security/</span><br>
+│       └── <span class="ft-new">security_page.dart</span> <span class="ft-badge new">STUB</span><br>
+└── <span class="ft-dir">widgets/</span><br>
+    ├── <span class="ft-existing">offline_indicator, speed_receipt, skeleton_loader, bottom_nav</span> <span class="ft-badge">existing</span><br>
+    ├── <span class="ft-new">page_thumbnail.dart</span> <span class="ft-badge new">NEW</span> ← CRITICAL shared widget<br>
+    ├── <span class="ft-new">page_selector_grid.dart</span> <span class="ft-badge new">NEW</span> ← CRITICAL shared widget<br>
+    └── <span class="ft-new">pro_gate.dart</span> <span class="ft-badge new">NEW</span> <span class="ft-badge pro">PRO</span>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 2: DEPENDENCIES ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-eyebrow"><span class="num">02</span> Dependency Changes</div>
+      <h2 class="section-title">Add to <code>pubspec.yaml</code> First</h2>
+      <p class="section-lead">Add these packages before writing any feature code. Run <code>flutter pub get</code> and a test build immediately. These are the only new dependencies required — everything else is covered by the existing stack.</p>
+    </div>
+
+    <div class="alert critical">
+      <span class="alert-icon">⛔</span>
+      <div class="alert-body">
+        <div class="alert-title">Build-First Rule — Non-Negotiable</div>
+        <div class="alert-text">Add ALL new packages to pubspec.yaml at once, run <code>flutter build apk --debug</code>, and confirm a green build <strong>before writing a single line of feature code.</strong> A dependency conflict discovered after 6 hours of work is catastrophic. Discovered at Hour 1 it is a 10-minute fix.</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="margin-bottom: 8px; font-size: 13px; color: var(--text2);">Packages to add:</div>
+      <div>
+        <span class="dep-pill"><span class="dep-action new">ADD</span> pdfrx: ^1.0.0</span>
+        <span class="dep-pill"><span class="dep-action new">ADD</span> google_mlkit_text_recognition: ^0.13.0</span>
+        <span class="dep-pill"><span class="dep-action new">ADD</span> flutter_image_compress: ^2.1.0</span>
+        <span class="dep-pill"><span class="dep-action new">ADD</span> image_picker: ^1.1.0</span>
+        <span class="dep-pill"><span class="dep-action keep">KEEP</span> syncfusion_flutter_pdf</span>
+        <span class="dep-pill"><span class="dep-action keep">KEEP</span> syncfusion_flutter_pdfviewer</span>
+        <span class="dep-pill"><span class="dep-action keep">KEEP</span> file_picker</span>
+        <span class="dep-pill"><span class="dep-action keep">KEEP</span> path_provider</span>
+        <span class="dep-pill"><span class="dep-action keep">KEEP</span> share_plus</span>
+        <span class="dep-pill"><span class="dep-action keep">KEEP</span> haptic_feedback</span>
+      </div>
+    </div>
+
+    <table class="data-table" style="margin-top: 24px;">
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Version</th>
+          <th>Purpose</th>
+          <th>Offline?</th>
+          <th>Used By</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>pdfrx</code></td>
+          <td><code>^1.0.0</code></td>
+          <td>Render PDF pages to bitmap images. Powers page thumbnails in all organize tools, and the PDF → Images conversion feature. Uses PDFium engine — same as Chrome.</td>
+          <td><span style="color:var(--green)">✓ 100%</span></td>
+          <td>PageThumbnailService, pdf_to_images_page</td>
+        </tr>
+        <tr>
+          <td><code>google_mlkit_text_recognition</code></td>
+          <td><code>^0.13.0</code></td>
+          <td>On-device OCR. Extracts editable text from images without any network call. ML models are bundled at build time.</td>
+          <td><span style="color:var(--green)">✓ 100%</span></td>
+          <td>convert_service (OCR PRO)</td>
+        </tr>
+        <tr>
+          <td><code>flutter_image_compress</code></td>
+          <td><code>^2.1.0</code></td>
+          <td>Re-encode JPEG images at lower quality for PDF compression. Significantly reduces file size when PDFs contain embedded photos.</td>
+          <td><span style="color:var(--green)">✓ 100%</span></td>
+          <td>compress_service</td>
+        </tr>
+        <tr>
+          <td><code>image_picker</code></td>
+          <td><code>^1.1.0</code></td>
+          <td>Gallery picker for Images → PDF and OCR features. Allows selecting multiple images from device storage.</td>
+          <td><span style="color:var(--green)">✓ 100%</span></td>
+          <td>images_to_pdf_page, ocr_page</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="alert info">
+      <span class="alert-icon">ℹ</span>
+      <div class="alert-body">
+        <div class="alert-title">Android Manifest Additions Required</div>
+        <div class="alert-text">For <code>image_picker</code>, add <code>READ_MEDIA_IMAGES</code> permission in <code>AndroidManifest.xml</code>. For <code>google_mlkit_text_recognition</code>, add the ML model download config to <code>AndroidManifest.xml</code> with <code>android:value="ocr"</code>. Both are standard boilerplate — check each package's pub.dev README for the exact XML snippet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 3: SHARED INFRASTRUCTURE ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-eyebrow"><span class="num">03</span> Shared Infrastructure — Build First</div>
+      <h2 class="section-title">Critical Shared Components</h2>
+      <p class="section-lead">These three components must be built <strong>before any feature pages</strong>. Every organize, convert, and extract page depends on them. Building them first eliminates rework.</p>
+    </div>
+
+    <!-- PageThumbnailService -->
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase1">SHARED · CRITICAL</span>
+        <span class="phase-title">lib/services/page_thumbnail_service.dart</span>
+        <span class="phase-goal">NEW FILE</span>
+      </div>
+      <div class="phase-body">
+        <p>Renders PDF pages to images using <code>pdfrx</code>. Implements an in-memory LRU cache to avoid re-rendering the same page twice. All page selector UIs share this single service.</p>
+
+        <div class="code-filename">lib/services/page_thumbnail_service.dart</div>
+        <pre>import 'dart:typed_data';
+import 'package:pdfrx/pdfrx.dart';
+
+class PageThumbnailService {
+  // In-memory LRU cache: key = "pdfPath::pageIndex::width"
+  final Map&lt;String, Uint8List&gt; _cache = {};
+  static const int _maxCacheEntries = 60; // ~12 pages × 5 PDFs
+
+  /// Renders a single PDF page to PNG bytes.
+  /// [width] controls output resolution (default 200px wide, height auto).
+  /// Returns null on failure — callers must show a placeholder.
+  Future&lt;Uint8List?&gt; getThumbnail(
+    String pdfPath,
+    int pageIndex, {
+    int width = 200,
+  }) async {
+    final cacheKey = '$pdfPath::$pageIndex::$width';
+    if (_cache.containsKey(cacheKey)) return _cache[cacheKey];
+
+    try {
+      final doc = await PdfDocument.openFile(pdfPath);
+      final page = doc.pages[pageIndex];
+      final pageImage = await page.render(
+        fullWidth: width.toDouble(),
+        fullHeight: (width * page.height / page.width),
+        backgroundColor: 0xFFFFFFFF,
+      );
+      final bytes = await pageImage.createImageIfNotAvailable()
+          .then((img) => img.toByteData(format: ui.ImageByteFormat.png))
+          .then((bd) => bd!.buffer.asUint8List());
+      doc.dispose();
+
+      // Evict oldest entry if over limit
+      if (_cache.length >= _maxCacheEntries) {
+        _cache.remove(_cache.keys.first);
+      }
+      _cache[cacheKey] = bytes;
+      return bytes;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Call when a PDF file changes (after split, delete, rotate etc.)
+  void evictPdf(String pdfPath) {
+    _cache.removeWhere((key, _) =&gt; key.startsWith('$pdfPath::'));
+  }
+
+  void clearAll() =&gt; _cache.clear();
+}</pre>
+
+        <div class="rule-block">
+          <div class="rule-label">Architecture Rule</div>
+          Instantiate this as a singleton via a global final or an InheritedWidget at the MaterialApp root. Do NOT instantiate per-page — the cache is the value.
+        </div>
+      </div>
+    </div>
+
+    <!-- PageSelectorGrid -->
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase1">SHARED · CRITICAL</span>
+        <span class="phase-title">lib/widgets/page_selector_grid.dart</span>
+        <span class="phase-goal">NEW FILE</span>
+      </div>
+      <div class="phase-body">
+        <p>A reusable <code>GridView</code> that renders all pages of a PDF as thumbnail cards with multi-select checkboxes. Used by: delete_pages, extract_pages, rotate_pages. The reorder page uses a variant with drag handles.</p>
+
+        <div class="code-filename">lib/widgets/page_selector_grid.dart</div>
+        <pre>/// [pdfPath]   — The PDF to display pages for.
+/// [pageCount] — Total pages (caller gets this from PdfDocument).
+/// [multiSelect] — true = checkboxes; false = single tap select.
+/// [onSelectionChanged] — Called with list of ZERO-BASED page indices.
+/// [rotationOverrides] — Optional map of pageIndex → degrees (0/90/180/270)
+///                        used by rotate_pages to show previews.
+class PageSelectorGrid extends StatefulWidget {
+  final String pdfPath;
+  final int pageCount;
+  final bool multiSelect;
+  final void Function(List&lt;int&gt; selectedIndices) onSelectionChanged;
+  final Map&lt;int, int&gt;? rotationOverrides;
+  final PageThumbnailService thumbnailService;
+
+  // Implementation notes:
+  // - GridView.builder with crossAxisCount: 3
+  // - Each cell: Stack with thumbnail image + page number label + checkbox overlay
+  // - Thumbnail loaded via FutureBuilder(thumbnailService.getThumbnail(...))
+  // - While loading: show SkeletonLoader placeholder
+  // - On error: show grey box with page number
+  // - Selected state: green border + checkmark overlay
+  // - Thumbnail size: 150px wide for grid (generates clear previews)
+}</pre>
+
+        <div class="rule-block amber">
+          <div class="rule-label">UX Rule</div>
+          Show a "Select All / Deselect All" button in the AppBar when multiSelect is true. Users routinely want to select all pages except one — this is far faster than tapping each card individually.
+        </div>
+      </div>
+    </div>
+
+    <!-- ProGate -->
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase1">SHARED</span>
+        <span class="phase-title">lib/widgets/pro_gate.dart</span>
+        <span class="phase-goal">NEW FILE</span>
+      </div>
+      <div class="phase-body">
+        <p>Wraps any PRO feature widget. When <code>isPro = false</code>, shows the child widget blurred at 50% opacity with an overlay containing the crown icon, feature name, and an "Upgrade to PRO" button that navigates to <code>/premium</code>. When <code>isPro = true</code>, renders the child normally.</p>
+
+        <div class="code-filename">lib/widgets/pro_gate.dart</div>
+        <pre>class ProGate extends StatelessWidget {
+  final bool isPro;        // Read from a global app state / SharedPreferences
+  final Widget child;      // The actual PRO feature UI
+  final String featureName; // e.g., "OCR Text Recognition"
+
+  // Implementation: Stack([
+  //   Opacity(opacity: isPro ? 1.0 : 0.4, child: child),
+  //   if (!isPro) _buildUpgradeOverlay(),
+  // ])
+  //
+  // _buildUpgradeOverlay(): BackdropFilter(ImageFilter.blur(sigmaX:4, sigmaY:4))
+  //   + Center column: crown icon, featureName, "PRO Feature" badge,
+  //     ElevatedButton("Upgrade to PRO" → Navigator.pushNamed('/premium'))
+}</pre>
+
+        <div class="alert info">
+          <span class="alert-icon">ℹ</span>
+          <div class="alert-body">
+            <div class="alert-title">isPro Source</div>
+            <div class="alert-text">For this MVP, hardcode <code>isPro = false</code> globally. Add a <code>bool isPro = false</code> field in main.dart or a simple AppState class accessible app-wide. The PRO pages still show the full functional UI underneath the gate — so PRO can be "unlocked" for the demo by flipping a single boolean.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 4: EXTEND PDF SERVICE ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-eyebrow"><span class="num">04</span> Organize PDF — Backend Logic</div>
+      <h2 class="section-title">Extend <code>pdf_service.dart</code></h2>
+      <p class="section-lead">All organize operations use the existing Syncfusion stack. Add these five static isolate functions to the existing <code>PdfService</code> class. All follow the same pattern: load → process page-by-page → save → dispose.</p>
+    </div>
+
+    <div class="alert success">
+      <span class="alert-icon">✓</span>
+      <div class="alert-body">
+        <div class="alert-title">Pattern Already Established</div>
+        <div class="alert-text">The existing <code>_mergePdfsIsolate</code> is the template. All new functions follow the identical structure: accept a <code>Map&lt;String, dynamic&gt;</code> params, process with Syncfusion, write to <code>AppDocuments/Oqba/documents/</code>, dispose all documents, return the output path string.</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase2">EXTEND</span>
+        <span class="phase-title">FUNCTION: splitPdf</span>
+        <span class="phase-goal">Split by range or by count</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/services/pdf_service.dart — add method</div>
+        <pre>/// Splits a PDF into multiple files by page ranges.
+///
+/// [pdfPath]    — Source PDF path (internal app directory)
+/// [ranges]     — List of page ranges e.g. [[0,2],[3,5]] (inclusive, 0-based)
+/// [outputName] — Base name for output files (e.g. "contract")
+/// Returns list of output file paths.
+///
+/// ISOLATE LOGIC:
+/// static List&lt;String&gt; _splitPdfIsolate(Map&lt;String, dynamic&gt; params) {
+///   final sourceBytes = File(params['pdfPath']).readAsBytesSync();
+///   final sourceDoc = PdfDocument(inputBytes: sourceBytes);
+///   final outputs = &lt;String&gt;[];
+///
+///   for (final range in params['ranges']) {
+///     final outDoc = PdfDocument();
+///     final startPage = range[0] as int;
+///     final endPage   = range[1] as int; // inclusive
+///
+///     for (int i = startPage; i &lt;= endPage; i++) {
+///       final template = sourceDoc.pages[i].createTemplate();
+///       final newPage = outDoc.pages.add();
+///       // Preserve original page size
+///       newPage.size = sourceDoc.pages[i].size;
+///       newPage.graphics.drawPdfTemplate(template, Offset.zero);
+///     }
+///
+///     final outPath = '${params["outputDir"]}/'
+///         '${params["outputName"]}_p${startPage+1}-p${endPage+1}_'
+///         '${DateTime.now().millisecondsSinceEpoch}.pdf';
+///     File(outPath).writeAsBytesSync(outDoc.saveSync());
+///     outDoc.dispose();
+///     outputs.add(outPath);
+///   }
+///
+///   sourceDoc.dispose();
+///   return outputs;
+/// }
+Future&lt;List&lt;String&gt;&gt; splitPdf(
+  String pdfPath,
+  List&lt;List&lt;int&gt;&gt; ranges,
+  String outputName,
+) async {
+  return compute(_splitPdfIsolate, {
+    'pdfPath': pdfPath,
+    'ranges': ranges,
+    'outputDir': await _getOqbaDocumentsDir(),
+    'outputName': outputName,
+  });
+}</pre>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase2">EXTEND</span>
+        <span class="phase-title">FUNCTION: extractPages</span>
+        <span class="phase-goal">Isolate specific pages into new PDF</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/services/pdf_service.dart — add method</div>
+        <pre>/// Extracts a non-contiguous list of pages into a new PDF.
+///
+/// [selectedIndices] — Zero-based page indices to keep (any order, auto-sorted)
+///
+/// ISOLATE LOGIC (similar to split, but non-contiguous):
+/// - Sort selectedIndices ascending
+/// - Iterate selected indices only
+/// - Copy each selected page's template to output doc
+/// - File name: "${outputName}_extracted_${timestamp}.pdf"
+Future&lt;String&gt; extractPages(
+  String pdfPath,
+  List&lt;int&gt; selectedIndices,
+  String outputName,
+) async {
+  return compute(_extractPagesIsolate, {
+    'pdfPath': pdfPath,
+    'selectedIndices': selectedIndices..sort(),
+    'outputDir': await _getOqbaDocumentsDir(),
+    'outputName': outputName,
+  });
+}</pre>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase2">EXTEND</span>
+        <span class="phase-title">FUNCTION: deletePages</span>
+        <span class="phase-goal">Remove pages and overwrite original</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/services/pdf_service.dart — add method</div>
+        <pre>/// Creates a new PDF with the specified pages REMOVED.
+///
+/// Strategy: Iterate ALL pages, copy to output only if index NOT in deleteSet.
+/// Outputs as new file (never overwrites original until confirmed success).
+///
+/// ISOLATE LOGIC:
+/// final deleteSet = Set&lt;int&gt;.from(params['deleteIndices']);
+/// for (int i = 0; i &lt; sourceDoc.pages.count; i++) {
+///   if (!deleteSet.contains(i)) {
+///     // copy page to outDoc
+///   }
+/// }
+///
+/// VALIDATION: If all pages selected for deletion → throw ArgumentError.
+/// Caller must validate selectedIndices.length &lt; totalPages before calling.
+Future&lt;String&gt; deletePages(
+  String pdfPath,
+  List&lt;int&gt; deleteIndices,
+  String outputName,
+) async {
+  return compute(_deletePagesIsolate, {
+    'pdfPath': pdfPath,
+    'deleteIndices': deleteIndices,
+    'outputDir': await _getOqbaDocumentsDir(),
+    'outputName': outputName,
+  });
+}</pre>
+        <div class="rule-block red">
+          <div class="rule-label">Guard — Add in UI Layer</div>
+          Before calling this function, the UI must check: <code>if (selectedIndices.length >= totalPageCount)</code> → show a SnackBar error "Cannot delete all pages". Never let this reach the service layer.
+        </div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase2">EXTEND</span>
+        <span class="phase-title">FUNCTION: rotatePages</span>
+        <span class="phase-goal">Apply rotation to selected pages</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/services/pdf_service.dart — add method</div>
+        <pre>/// Rotates specified pages by the given angle and saves as a new PDF.
+///
+/// [rotations] — Map of pageIndex → rotation degrees (must be 90, 180, or 270)
+///
+/// ISOLATE LOGIC using Syncfusion PdfPageRotateAngle:
+/// for (int i = 0; i &lt; sourceDoc.pages.count; i++) {
+///   final angle = rotationMap[i] ?? 0;
+///   final rotation = switch(angle) {
+///     90  =&gt; PdfPageRotateAngle.rotateAngle90,
+///     180 =&gt; PdfPageRotateAngle.rotateAngle180,
+///     270 =&gt; PdfPageRotateAngle.rotateAngle270,
+///     _   =&gt; PdfPageRotateAngle.rotateAngle0,
+///   };
+///   // Use Syncfusion's page rotation API on the output document's page
+///   outPage.rotation = rotation;
+/// }
+///
+/// NOTE: Apply rotation by setting the page rotation property on a NEW
+/// PdfDocument, not by modifying sourceDoc directly.
+Future&lt;String&gt; rotatePages(
+  String pdfPath,
+  Map&lt;int, int&gt; rotations, // pageIndex → degrees
+  String outputName,
+) async {
+  return compute(_rotatePagesIsolate, {
+    'pdfPath': pdfPath,
+    'rotations': rotations,
+    'outputDir': await _getOqbaDocumentsDir(),
+    'outputName': outputName,
+  });
+}</pre>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase2">EXTEND</span>
+        <span class="phase-title">FUNCTION: reorderPages</span>
+        <span class="phase-goal">Output PDF with pages in new order</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/services/pdf_service.dart — add method</div>
+        <pre>/// Creates a new PDF with pages in the specified order.
+///
+/// [newOrder] — List of original 0-based page indices in desired output order.
+///              e.g. [2, 0, 1] means page 3 first, then page 1, then page 2.
+///
+/// ISOLATE LOGIC:
+/// for (final originalIndex in params['newOrder']) {
+///   final template = sourceDoc.pages[originalIndex].createTemplate();
+///   final newPage = outDoc.pages.add();
+///   newPage.size = sourceDoc.pages[originalIndex].size;
+///   newPage.graphics.drawPdfTemplate(template, Offset.zero);
+/// }
+Future&lt;String&gt; reorderPages(
+  String pdfPath,
+  List&lt;int&gt; newOrder,
+  String outputName,
+) async {
+  return compute(_reorderPagesIsolate, {
+    'pdfPath': pdfPath,
+    'newOrder': newOrder,
+    'outputDir': await _getOqbaDocumentsDir(),
+    'outputName': outputName,
+  });
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 5: NEW SERVICES ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-eyebrow"><span class="num">05</span> New Services</div>
+      <h2 class="section-title">Convert, Extract & Compress Services</h2>
+      <p class="section-lead">Three new service files handling the Convert, Extract & Optimize, and Security feature categories. All heavy operations run in isolates. All outputs use the standard file contract.</p>
+    </div>
+
+    <!-- ConvertService -->
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase3">NEW FILE</span>
+        <span class="phase-title">lib/services/convert_service.dart</span>
+        <span class="phase-goal">PDF ↔ Image, OCR</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/services/convert_service.dart</div>
+        <pre>class ConvertService {
+
+  // ─────────────────────────────────────────────
+  // PDF → Images
+  // ─────────────────────────────────────────────
+
+  /// Rasterizes every page of a PDF to individual image files.
+  ///
+  /// [pdfPath]     — Source PDF (internal directory)
+  /// [format]      — 'png' or 'jpg' (default 'jpg' for smaller file size)
+  /// [qualityDpi]  — Target DPI: 72 (screen), 150 (standard), 300 (print)
+  /// Returns list of output image file paths (one per page).
+  ///
+  /// IMPLEMENTATION using pdfrx:
+  ///   final doc = await PdfDocument.openFile(pdfPath);
+  ///   for (int i = 0; i &lt; doc.pages.length; i++) {
+  ///     final page = doc.pages[i];
+  ///     final scale = qualityDpi / 72.0;
+  ///     final image = await page.render(
+  ///       fullWidth:  page.width  * scale,
+  ///       fullHeight: page.height * scale,
+  ///       backgroundColor: 0xFFFFFFFF,
+  ///     );
+  ///     final bytes = ... // encode to PNG or JPEG
+  ///     final outPath = '$outputDir/${baseName}_page${i+1}.$format';
+  ///     File(outPath).writeAsBytesSync(bytes);
+  ///   }
+  ///   doc.dispose();
+  ///
+  /// NOTE: Run in compute() isolate. DPI 300 on a 20-page PDF can take 10-20s.
+  /// Show progress indicator with page count.
+  Future&lt;List&lt;String&gt;&gt; pdfToImages(
+    String pdfPath, {
+    String format = 'jpg',
+    int qualityDpi = 150,
+  }) async { ... }
+
+  // ─────────────────────────────────────────────
+  // Images → PDF (extends existing imagesToPdf in PdfService)
+  // ─────────────────────────────────────────────
+
+  /// Wraps PdfService.imagesToPdf with multi-image picker support.
+  /// This is a thin wrapper — actual logic stays in PdfService.
+  /// This service adds: ordering UI support, format validation.
+  ///
+  /// [imagePaths]  — Ordered list of image paths (user-ordered before calling)
+  /// [pageSize]    — 'A4', 'Letter', 'FitToImage' (default 'FitToImage')
+  Future&lt;String&gt; imagesToPdf(
+    List&lt;String&gt; imagePaths, {
+    String pageSize = 'FitToImage',
+    String outputName = 'images_to_pdf',
+  }) async { ... }
+
+  // ─────────────────────────────────────────────
+  // OCR — PRO Feature
+  // ─────────────────────────────────────────────
+
+  /// Extracts text from a single image file using ML Kit on-device OCR.
+  /// 100% offline. Supports: printed text, handwriting (with language hint).
+  ///
+  /// [imagePath]    — Path to image file (jpg, png)
+  /// [languageCode] — BCP-47 code e.g. 'en', 'ar', 'fr' (default 'en')
+  /// Returns the extracted text string. Empty string if no text found.
+  ///
+  /// IMPLEMENTATION:
+  ///   final inputImage = InputImage.fromFilePath(imagePath);
+  ///   final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  ///   final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+  ///   textRecognizer.close();
+  ///   return recognizedText.text;
+  ///
+  /// NOTE: For Arabic text, use TextRecognitionScript.devanagari or check
+  ///       ML Kit docs for Arabic script support. Latin script handles most
+  ///       European languages. Run on main thread — ML Kit handles its own threading.
+  Future&lt;String&gt; extractTextFromImage(
+    String imagePath, {
+    String languageCode = 'en',
+  }) async { ... }
+}</pre>
+      </div>
+    </div>
+
+    <!-- ExtractService -->
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase3">NEW FILE</span>
+        <span class="phase-title">lib/services/extract_service.dart</span>
+        <span class="phase-goal">Extract images & text from PDFs</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/services/extract_service.dart</div>
+        <pre>class ExtractService {
+
+  // ─────────────────────────────────────────────
+  // Extract Images from PDF
+  // ─────────────────────────────────────────────
+
+  /// Deep-scans PDF document architecture and extracts all embedded images.
+  /// Uses Syncfusion's image extraction API.
+  ///
+  /// Returns list of output image paths saved to AppDocuments/Oqba/extracted/
+  ///
+  /// IMPLEMENTATION using Syncfusion:
+  ///   final doc = PdfDocument(inputBytes: bytes);
+  ///   final extractor = PdfImageExtractor(doc);
+  ///   final count = extractor.getImageCount();
+  ///   for (int i = 0; i &lt; count; i++) {
+  ///     final PdfImage image = extractor[i];
+  ///     final imgBytes = image.imageData;
+  ///     final ext = image.imageFormat == PdfImageFormat.jpeg ? 'jpg' : 'png';
+  ///     File('$outputDir/image_${i+1}.$ext').writeAsBytesSync(imgBytes);
+  ///   }
+  ///   extractor.dispose();
+  ///   doc.dispose();
+  ///
+  /// NOTE: Run in compute() isolate.
+  /// If count == 0, return empty list. UI must handle this gracefully.
+  Future&lt;List&lt;String&gt;&gt; extractImagesFromPdf(String pdfPath) async { ... }
+
+  // ─────────────────────────────────────────────
+  // Extract Text from PDF
+  // ─────────────────────────────────────────────
+
+  /// Extracts all machine-readable text from a PDF document.
+  /// This works on PDFs with embedded text layers (not scanned images).
+  /// For scanned-image PDFs, text will be empty → suggest OCR to user.
+  ///
+  /// Returns a single string with all text from all pages.
+  /// Page breaks represented as '\n\n--- Page N ---\n\n' for readability.
+  ///
+  /// IMPLEMENTATION using Syncfusion:
+  ///   final extractor = PdfTextExtractor(doc);
+  ///   final StringBuffer buffer = StringBuffer();
+  ///   for (int i = 0; i &lt; doc.pages.count; i++) {
+  ///     final pageText = extractor.extractText(startPageIndex: i, endPageIndex: i);
+  ///     if (pageText.trim().isNotEmpty) {
+  ///       buffer.writeln('\n--- Page ${i+1} ---\n');
+  ///       buffer.write(pageText);
+  ///     }
+  ///   }
+  ///   return buffer.toString();
+  ///
+  /// NOTE: Run in compute() isolate for large documents.
+  Future&lt;String&gt; extractTextFromPdf(String pdfPath) async { ... }
+
+  /// Helper: ensures extracted/ subdirectory exists
+  Future&lt;String&gt; _getExtractedDir() async {
+    final base = await getApplicationDocumentsDirectory();
+    final dir = Directory('${base.path}/Oqba/extracted');
+    if (!await dir.exists()) await dir.create(recursive: true);
+    return dir.path;
+  }
+}</pre>
+      </div>
+    </div>
+
+    <!-- CompressService -->
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase3">NEW FILE · PRO</span>
+        <span class="phase-title">lib/services/compress_service.dart</span>
+        <span class="phase-goal">Reduce PDF file size — PRO feature</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/services/compress_service.dart</div>
+        <pre>class CompressService {
+
+  // Compression presets
+  static const Map&lt;String, _CompressionPreset&gt; presets = {
+    'low':    _CompressionPreset(label: 'Low',    jpegQuality: 85, syncLevel: PdfCompressionLevel.best),
+    'medium': _CompressionPreset(label: 'Medium', jpegQuality: 65, syncLevel: PdfCompressionLevel.best),
+    'high':   _CompressionPreset(label: 'High',   jpegQuality: 40, syncLevel: PdfCompressionLevel.best),
+  };
+
+  /// Compresses a PDF using a two-stage approach:
+  ///
+  /// STAGE 1 — Syncfusion native compression:
+  ///   doc.compressionLevel = preset.syncLevel;
+  ///   // This compresses streams, removes duplicate objects, optimizes xref
+  ///
+  /// STAGE 2 — Image resampling (the major size reduction):
+  ///   For each page, extract embedded images, re-encode with flutter_image_compress
+  ///   at preset.jpegQuality, then embed the smaller version back.
+  ///
+  /// NOTE: Stage 2 is the heavyweight operation. Run in compute() isolate.
+  /// Input PDFs with no embedded images (text-only) will only benefit from Stage 1.
+  ///
+  /// Returns a CompressResult with: outputPath, originalSizeBytes, newSizeBytes
+  Future&lt;CompressResult&gt; compressPdf(
+    String pdfPath,
+    String preset, // 'low', 'medium', 'high'
+  ) async { ... }
+}
+
+class CompressResult {
+  final String outputPath;
+  final int originalSizeBytes;
+  final int newSizeBytes;
+  int get savedBytes =&gt; originalSizeBytes - newSizeBytes;
+  double get reductionPercent =&gt; (savedBytes / originalSizeBytes) * 100;
+}</pre>
+
+        <div class="rule-block amber">
+          <div class="rule-label">PRO Gate Rule</div>
+          The <code>compress_page.dart</code> UI must be wrapped in a <code>ProGate</code> widget. The service layer has no knowledge of PRO status — the gate is entirely in the UI layer. This makes demo unlock (flip isPro) instant.
+        </div>
+      </div>
+    </div>
+
+    <!-- SecurityService (Stub) -->
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase4">STUB</span>
+        <span class="phase-title">lib/services/security_service.dart</span>
+        <span class="phase-goal">Architecture scaffold — not implemented</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/services/security_service.dart</div>
+        <pre>/// Security Service — Architecture Scaffold
+/// Full implementation is deferred to v2.0.
+/// This file establishes the interface contracts for future implementation.
+///
+/// Planned features (Syncfusion supports all of these):
+///   - Password Protect: PdfSecurity.userPassword + PdfSecurity.ownerPassword
+///   - Encrypt: PdfEncryptionAlgorithm.aesx256Bit
+///   - Remove Password: Open with ownerPassword, save without security
+///   - Watermark: PdfGraphics.drawString with PdfGraphicsState.transparency
+abstract class SecurityService {
+  Future&lt;String&gt; passwordProtect(String pdfPath, String userPassword, String ownerPassword);
+  Future&lt;String&gt; removePassword(String pdfPath, String ownerPassword);
+  Future&lt;String&gt; addWatermark(String pdfPath, String watermarkText);
+  Future&lt;bool&gt; isPasswordProtected(String pdfPath);
+}
+
+/// Temporary no-op implementation — replace in v2.0
+class SecurityServiceStub implements SecurityService {
+  @override Future&lt;String&gt; passwordProtect(_, __, ___) =&gt; throw UnimplementedError();
+  @override Future&lt;String&gt; removePassword(_, __) =&gt; throw UnimplementedError();
+  @override Future&lt;String&gt; addWatermark(_, __) =&gt; throw UnimplementedError();
+  @override Future&lt;bool&gt; isPasswordProtected(_) =&gt; Future.value(false);
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 6: UI PAGES ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-eyebrow"><span class="num">06</span> All UI Pages — Complete Specifications</div>
+      <h2 class="section-title">13 New Pages — Build in This Order</h2>
+      <p class="section-lead">Each page follows the same structure: AppBar with OfflineIndicator and back button → body content → bottom action button → SpeedReceipt on completion. Build shared infrastructure pages first, then feature pages by category.</p>
+    </div>
+
+    <div class="alert info">
+      <span class="alert-icon">ℹ</span>
+      <div class="alert-body">
+        <div class="alert-title">Universal Page Pattern — Apply to Every Page</div>
+        <div class="alert-text">
+          1. AppBar: title + back button + <code>OfflineIndicator()</code> as action<br>
+          2. Body: feature-specific content<br>
+          3. Bottom: prominent <code>ElevatedButton</code> with action label (e.g., "Split PDF", "Extract Text")<br>
+          4. On action: <code>setState(isProcessing = true)</code> → show <code>CircularProgressIndicator</code> → call service → <code>setState(isProcessing = false)</code> → show <code>SpeedReceipt</code><br>
+          5. On error: <code>ScaffoldMessenger.showSnackBar</code> with descriptive error message — never a blank screen
+        </div>
+      </div>
+    </div>
+
+    <!-- ORGANIZE PAGES -->
+    <div style="margin: 32px 0 16px; font-size: 12px; font-family: 'Fira Code', monospace; color: var(--text3); text-transform: uppercase; letter-spacing: 0.14em; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+      Category: Organize PDF
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Primary Widget</th>
+          <th>User Flow</th>
+          <th>Service Call</th>
+          <th>Key Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>split_page.dart</code></td>
+          <td>FilePicker + Range Input</td>
+          <td>Pick PDF → Enter ranges (e.g. "1-3, 4-6, 7") OR choose "Split Every N Pages" → Tap Split → Multiple output files in home list</td>
+          <td><code>PdfService.splitPdf()</code></td>
+          <td>Show a <code>TextField</code> for manual range entry with format hint "1-3, 4-6". Also provide a "Split every N pages" stepper (default N=1). Validate range doesn't exceed page count before calling service. Show output file count in SpeedReceipt.</td>
+        </tr>
+        <tr>
+          <td><code>extract_pages_page.dart</code></td>
+          <td>PageSelectorGrid (multi-select)</td>
+          <td>Pick PDF → Grid of page thumbnails → Select pages → "Extract X Pages" button → New PDF in home list</td>
+          <td><code>PdfService.extractPages()</code></td>
+          <td>Button label updates dynamically: "Extract 0 Pages" → "Extract 3 Pages" as user selects. Disable button when selection count = 0. Show "Select All" in AppBar.</td>
+        </tr>
+        <tr>
+          <td><code>reorder_pages_page.dart</code></td>
+          <td>ReorderableListView with thumbnails</td>
+          <td>Pick PDF → Vertical list of page thumbnails with drag handles → Long-press or drag to reorder → "Save Order" → Overwrites or new file</td>
+          <td><code>PdfService.reorderPages()</code></td>
+          <td>Use Flutter's built-in <code>ReorderableListView</code> widget. Each list item: small thumbnail (80px) + page number + drag handle icon. Show "Order Unchanged" message if user tries to save without any reordering.</td>
+        </tr>
+        <tr>
+          <td><code>delete_pages_page.dart</code></td>
+          <td>PageSelectorGrid (multi-select)</td>
+          <td>Pick PDF → Grid of thumbnails → Select pages to DELETE → Confirm dialog → "Delete X Pages" → New PDF in home list</td>
+          <td><code>PdfService.deletePages()</code></td>
+          <td>Show a red-accented confirmation <code>AlertDialog</code> before deleting: "Delete 3 pages permanently? This creates a new file." Guard: if all pages selected, show error SnackBar instead of dialog.</td>
+        </tr>
+        <tr>
+          <td><code>rotate_pages_page.dart</code></td>
+          <td>PageSelectorGrid + rotation controls</td>
+          <td>Pick PDF → Grid thumbnails → Select pages → Choose 90° / 180° / 270° CW → Preview rotation overlay on thumbnail → "Apply Rotation" → New PDF</td>
+          <td><code>PdfService.rotatePages()</code></td>
+          <td>Show three <code>SegmentedButton</code> options: 90°, 180°, 270°. Selected pages show a rotation badge overlay on their thumbnail. Pass <code>rotationOverrides</code> map to PageSelectorGrid for visual preview. "Rotate All" shortcut button in AppBar.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- CONVERT PAGES -->
+    <div style="margin: 32px 0 16px; font-size: 12px; font-family: 'Fira Code', monospace; color: var(--text3); text-transform: uppercase; letter-spacing: 0.14em; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+      Category: Convert
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>User Flow</th>
+          <th>Service Call</th>
+          <th>Key Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>pdf_to_images_page.dart</code></td>
+          <td>Pick PDF → Choose format (PNG/JPG toggle) + quality preset (Screen 72dpi / Standard 150dpi / Print 300dpi) → "Convert All Pages" → Images saved to Oqba/extracted/ → Option to share via share_plus</td>
+          <td><code>ConvertService.pdfToImages()</code></td>
+          <td>Show page count BEFORE user taps convert (read PDF metadata first). Warn user if page count > 20 that print quality may take ~30 seconds. Show per-page progress (page 3/12...) using <code>StreamController</code> passed to service.</td>
+        </tr>
+        <tr>
+          <td><code>images_to_pdf_page.dart</code></td>
+          <td>Tap "Add Images" → image_picker multi-select → ReorderableListView of selected images with thumbnails → Name the PDF → "Create PDF" → PDF in home list</td>
+          <td><code>ConvertService.imagesToPdf()</code> → <code>PdfService.imagesToPdf()</code></td>
+          <td>Each list item shows a 60px image thumbnail + filename + size + drag handle. Allow removing individual images (swipe or X button). Show "Add More" button at bottom of list. Warn if image count > 50.</td>
+        </tr>
+        <tr>
+          <td><code>ocr_page.dart</code> (PRO)</td>
+          <td>Wrapped in ProGate → Pick image from gallery or camera → "Extract Text" → Show extracted text in scrollable TextField → Copy to clipboard button + Export as .txt button</td>
+          <td><code>ConvertService.extractTextFromImage()</code></td>
+          <td>Show a "Processing with AI" loading state (keep "Offline" visible to avoid confusion — this is local AI, not cloud). If extracted text is empty, show: "No text found. Try a clearer image." Export .txt saves to Oqba/extracted/ directory.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- EXTRACT & OPTIMIZE PAGES -->
+    <div style="margin: 32px 0 16px; font-size: 12px; font-family: 'Fira Code', monospace; color: var(--text3); text-transform: uppercase; letter-spacing: 0.14em; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+      Category: Extract & Optimize
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>User Flow</th>
+          <th>Service Call</th>
+          <th>Key Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>extract_images_page.dart</code></td>
+          <td>Pick PDF → "Scan for Images" → Show count found → Grid of extracted images with format + size labels → "Save All Images" → Images in Oqba/extracted/ → Share button per image or batch</td>
+          <td><code>ExtractService.extractImagesFromPdf()</code></td>
+          <td>Show the image count scan result prominently: "Found 8 images". If count = 0, show empty state: "This PDF contains no embedded images. For scanned PDFs, use PDF to Images instead." Link to PDF→Images tool.</td>
+        </tr>
+        <tr>
+          <td><code>extract_text_page.dart</code></td>
+          <td>Pick PDF → "Extract Text" → Scrollable text result with page dividers → Word count + character count stats → Copy All button + Export as .txt</td>
+          <td><code>ExtractService.extractTextFromPdf()</code></td>
+          <td>If extracted text is very short (< 100 chars) relative to page count, show an info banner: "Limited text detected. This PDF may be scanned. Try OCR for better results." — link to OCR tool. Show page dividers in output for readability.</td>
+        </tr>
+        <tr>
+          <td><code>compress_page.dart</code> (PRO)</td>
+          <td>Wrapped in ProGate → Pick PDF → Show original file size → Choose preset (Low / Medium / High compression) → Show estimated size reduction → "Compress" → Show CompressResult with before/after size comparison + % saved</td>
+          <td><code>CompressService.compressPdf()</code></td>
+          <td>The before/after size comparison is the "wow" moment. Display it as: "4.2 MB → 1.1 MB · Saved 73%". Use a simple animated progress bar to show the reduction. The SpeedReceipt should show: "Compressed in 2.3s · Saved 3.1 MB · Offline".</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- SECURITY PAGE -->
+    <div style="margin: 32px 0 16px; font-size: 12px; font-family: 'Fira Code', monospace; color: var(--text3); text-transform: uppercase; letter-spacing: 0.14em; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+      Category: Security (Coming Soon)
+    </div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase4">STUB</span>
+        <span class="phase-title">lib/pages/security/security_page.dart</span>
+        <span class="phase-goal">Visual placeholder — NOT functional</span>
+      </div>
+      <div class="phase-body">
+        <p>A polished "Coming Soon" screen that shows the full planned security feature set as a visual roadmap. This serves two purposes: it makes the tools grid look complete, and it signals product vision to judges.</p>
+
+        <div class="code-filename">lib/pages/security/security_page.dart — Layout specification</div>
+        <pre>// AppBar: "PDF Security" + OfflineIndicator
+//
+// Body: Center column with:
+//   - Lock icon (large, amber/gold color)
+//   - Heading: "Advanced Security — Coming Soon"
+//   - Subtext: "Protect your sensitive documents with enterprise-grade security, all offline."
+//
+//   - Feature list (visual only, non-tappable):
+//     🔐  Password Protection   — Set user & owner passwords
+//     🔒  256-bit Encryption    — AES-256 document encryption
+//     🔓  Remove Password       — Decrypt with owner credentials
+//     💧  Watermarking          — Stamp custom text or logo
+//
+//   - Progress indicator: "Security Module · In Development"
+//   - Bottom CTA: "Notify Me" button (shows SnackBar: "You'll be the first to know!")</pre>
+
+        <div class="rule-block amber">
+          <div class="rule-label">Important — Do Not Build Placeholder UI Carelessly</div>
+          The Security page must look as polished as the rest of the app. Judges reviewing the tools grid will tap it. A rough placeholder harms the overall impression. Use the same surface colors, typography, and spacing as every other page.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 7: WIRING ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-eyebrow"><span class="num">07</span> Wiring — Routes & Tools Grid</div>
+      <h2 class="section-title">Update main.dart & tools_page.dart</h2>
+      <p class="section-lead">Two files need updating to connect everything. This is the last step — do not update these until all pages are built and their files exist.</p>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase2">UPDATE</span>
+        <span class="phase-title">lib/main.dart — Route Table</span>
+        <span class="phase-goal">Register all new routes</span>
+      </div>
+      <div class="phase-body">
+        <div class="code-filename">lib/main.dart — routes map (add to existing)</div>
+        <pre>routes: {
+  // ── Existing ──────────────────────────────────
+  '/':          (_) =&gt; const HomePage(),
+  '/tools':     (_) =&gt; const ToolsPage(),
+  '/scan':      (_) =&gt; const ScannerPage(),
+  '/merge':     (_) =&gt; const MergePage(),
+  '/settings':  (_) =&gt; const SettingsPage(),
+  '/premium':   (_) =&gt; const PremiumPage(),
+
+  // ── Organize ──────────────────────────────────
+  '/organize/split':         (_) =&gt; const SplitPage(),
+  '/organize/extract-pages': (_) =&gt; const ExtractPagesPage(),
+  '/organize/reorder':       (_) =&gt; const ReorderPagesPage(),
+  '/organize/delete':        (_) =&gt; const DeletePagesPage(),
+  '/organize/rotate':        (_) =&gt; const RotatePagesPage(),
+
+  // ── Convert ───────────────────────────────────
+  '/convert/pdf-to-images':  (_) =&gt; const PdfToImagesPage(),
+  '/convert/images-to-pdf':  (_) =&gt; const ImagesToPdfPage(),
+  '/convert/ocr':            (_) =&gt; const OcrPage(),
+
+  // ── Extract & Optimize ────────────────────────
+  '/extract/images':         (_) =&gt; const ExtractImagesPage(),
+  '/extract/text':           (_) =&gt; const ExtractTextPage(),
+  '/extract/compress':       (_) =&gt; const CompressPage(),
+
+  // ── Security ──────────────────────────────────
+  '/security':               (_) =&gt; const SecurityPage(),
+},</pre>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header">
+        <span class="phase-tag phase2">UPDATE</span>
+        <span class="phase-title">lib/pages/tools_page.dart — Full Tools Grid</span>
+        <span class="phase-goal">Replace stub tools with complete grid</span>
+      </div>
+      <div class="phase-body">
+        <p>Replace the MVP tools grid (showing only Merge + Coming Soon) with the full categorized tools grid. Structure as category sections with a horizontal divider and category label between groups.</p>
+
+        <div class="code-filename">lib/pages/tools_page.dart — tools data structure</div>
+        <pre>/// Tool model for grid items
+class ToolItem {
+  final String icon;        // emoji or icon asset
+  final String name;
+  final String description;
+  final String route;
+  final bool isPro;
+  final bool isNew;         // show "New" badge
+  final bool isComingSoon;  // show lock/coming-soon UI
+}
+
+/// Full tools list — passed to grid builder
+final List&lt;ToolCategory&gt; toolCategories = [
+  ToolCategory(
+    name: 'Organize PDF',
+    tools: [
+      ToolItem(icon: '🔗', name: 'Merge PDF',       route: '/merge',                description: 'Combine multiple PDFs'),
+      ToolItem(icon: '✂️', name: 'Split PDF',        route: '/organize/split',       description: 'Divide into smaller files'),
+      ToolItem(icon: '📑', name: 'Extract Pages',   route: '/organize/extract-pages', description: 'Isolate specific pages'),
+      ToolItem(icon: '↕️', name: 'Reorder Pages',   route: '/organize/reorder',     description: 'Drag to rearrange'),
+      ToolItem(icon: '🗑️', name: 'Delete Pages',   route: '/organize/delete',      description: 'Remove unwanted pages'),
+      ToolItem(icon: '🔄', name: 'Rotate Pages',    route: '/organize/rotate',      description: 'Fix orientation'),
+    ],
+  ),
+  ToolCategory(
+    name: 'Convert',
+    tools: [
+      ToolItem(icon: '🖼️', name: 'PDF to Images',  route: '/convert/pdf-to-images', description: 'Rasterize PDF pages'),
+      ToolItem(icon: '📄', name: 'Images to PDF',  route: '/convert/images-to-pdf', description: 'Compile images as PDF'),
+      ToolItem(icon: '🔍', name: 'Images to Text', route: '/convert/ocr',           description: 'OCR extraction', isPro: true),
+    ],
+  ),
+  ToolCategory(
+    name: 'Extract & Optimize',
+    tools: [
+      ToolItem(icon: '🖼',  name: 'Extract Images', route: '/extract/images',   description: 'Get embedded images'),
+      ToolItem(icon: '📝',  name: 'Extract Text',   route: '/extract/text',     description: 'Copy PDF text'),
+      ToolItem(icon: '🗜️', name: 'Compress PDF',   route: '/extract/compress', description: 'Reduce file size', isPro: true),
+    ],
+  ),
+  ToolCategory(
+    name: 'Security',
+    tools: [
+      ToolItem(icon: '🔐', name: 'PDF Security', route: '/security', description: 'Passwords & encryption', isComingSoon: true),
+    ],
+  ),
+];</pre>
+
+        <div class="rule-block">
+          <div class="rule-label">Grid UI Rules</div>
+          PRO tools: show amber crown badge overlay on the tool card icon — still fully tappable, ProGate handles the lock inside the page. Coming Soon tools: slightly dimmed (60% opacity) + "Soon" badge — still tappable (shows the stub security page). This keeps the grid visually complete and consistent.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECTION 8: VALIDATION ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-eyebrow"><span class="num">08</span> Validation & Test Matrix</div>
+      <h2 class="section-title">Acceptance Criteria — Every Feature</h2>
+      <p class="section-lead">Each feature is not complete until its row in this matrix passes on a physical device. Do not mark any feature done based on emulator results alone.</p>
+    </div>
+
+    <div class="alert critical">
+      <span class="alert-icon">⛔</span>
+      <div class="alert-body">
+        <div class="alert-title">Emulator ≠ Acceptance</div>
+        <div class="alert-text">Camera, haptics, storage permissions, and ML Kit performance are fundamentally different on physical hardware. All "Pass" marks below must be verified on a real Android device. For the <code>pdfrx</code> rendering performance, ensure you test with a real multi-page PDF (10+ pages) — not a 2-page test file.</div>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Test Input</th>
+          <th>Pass Criteria</th>
+          <th>Known Failure Mode to Test</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Split PDF</strong></td>
+          <td>10-page PDF, range "1-3, 4-7, 8-10"</td>
+          <td>3 output files appear in home list. Each opens correctly. Page counts match ranges.</td>
+          <td>Range exceeds page count → clear error SnackBar, no crash.</td>
+        </tr>
+        <tr>
+          <td><strong>Extract Pages</strong></td>
+          <td>8-page PDF, select pages 1, 3, 7</td>
+          <td>Output PDF has exactly 3 pages in correct order. SpeedReceipt shows timing.</td>
+          <td>Select 0 pages → button disabled, no crash.</td>
+        </tr>
+        <tr>
+          <td><strong>Reorder Pages</strong></td>
+          <td>5-page PDF, drag page 1 to position 5</td>
+          <td>Output PDF opens with page 1 at end. Thumbnails in reorder view match reality.</td>
+          <td>No reordering performed → "Order Unchanged" SnackBar, no duplicate file.</td>
+        </tr>
+        <tr>
+          <td><strong>Delete Pages</strong></td>
+          <td>6-page PDF, select pages 2 and 4</td>
+          <td>Output PDF has 4 pages. Pages 2 and 4 from original are absent.</td>
+          <td>All 6 pages selected → error SnackBar "Cannot delete all pages", no crash.</td>
+        </tr>
+        <tr>
+          <td><strong>Rotate Pages</strong></td>
+          <td>4-page PDF, rotate page 1 by 90°, page 3 by 180°</td>
+          <td>Output opens with pages 1 and 3 rotated as specified. Pages 2 and 4 unchanged.</td>
+          <td>No pages selected → button disabled or shows helpful prompt.</td>
+        </tr>
+        <tr>
+          <td><strong>PDF to Images</strong></td>
+          <td>5-page PDF, JPG, Standard 150dpi</td>
+          <td>5 JPG files in Oqba/extracted/. Each opens as full-resolution page image.</td>
+          <td>Very large PDF (50+ pages, 300dpi) → progress indicator shows, no ANR.</td>
+        </tr>
+        <tr>
+          <td><strong>Images to PDF</strong></td>
+          <td>3 JPG images of different sizes</td>
+          <td>Output PDF has 3 pages. Each page contains its source image. File appears in home list.</td>
+          <td>0 images selected → "Create PDF" button disabled.</td>
+        </tr>
+        <tr>
+          <td><strong>OCR (PRO)</strong></td>
+          <td>Image of printed English text</td>
+          <td>ProGate shows when isPro=false. When isPro=true: extracted text is accurate, Copy works, Export saves .txt file.</td>
+          <td>Blank image → "No text found" state shown, no crash.</td>
+        </tr>
+        <tr>
+          <td><strong>Extract Images</strong></td>
+          <td>PDF with 4 embedded JPEG images</td>
+          <td>"Found 4 images" shown. 4 image files saved to extracted/. Each opens correctly.</td>
+          <td>Text-only PDF → "No embedded images" empty state, suggests PDF→Images tool.</td>
+        </tr>
+        <tr>
+          <td><strong>Extract Text</strong></td>
+          <td>PDF with 3 pages of machine-readable text</td>
+          <td>Text output shows all 3 pages with dividers. Word count displayed. Copy all works. Export .txt works.</td>
+          <td>Scanned image PDF → low text result, banner suggests OCR.</td>
+        </tr>
+        <tr>
+          <td><strong>Compress (PRO)</strong></td>
+          <td>5MB PDF with embedded photos</td>
+          <td>ProGate shows when isPro=false. When isPro=true: output is smaller than input. Size comparison displayed.</td>
+          <td>Text-only PDF → still compresses (Stage 1 only), realistic reduction shown.</td>
+        </tr>
+        <tr>
+          <td><strong>Security (Stub)</strong></td>
+          <td>Tap security from tools grid</td>
+          <td>Polished Coming Soon screen renders. "Notify Me" button shows SnackBar. No crash.</td>
+          <td>N/A — stub only.</td>
+        </tr>
+        <tr>
+          <td><strong>Tools Grid</strong></td>
+          <td>Open tools tab</td>
+          <td>All 4 categories visible. PRO badges on correct tools. All cards tappable. No layout overflow.</td>
+          <td>Test on small screen (360dp width) — no horizontal overflow.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══ SECTION 9: EXECUTION ORDER ══ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-eyebrow"><span class="num">09</span> Agent Execution Order</div>
+      <h2 class="section-title">Optimal Build Sequence</h2>
+      <p class="section-lead">Follow this order strictly. Each group unblocks the next. Parallel execution is possible within each group.</p>
+    </div>
+
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Dependencies → Build Verification</div>
+          <div class="step-detail">Add all 4 new packages to <code>pubspec.yaml</code>. Run <code>flutter pub get</code>. Run <code>flutter build apk --debug</code>. Fix any Gradle/Kotlin conflicts. <span class="hl">Do not proceed until build is green.</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Shared Infrastructure (Group — can parallel)</div>
+          <div class="step-detail">Build <code>page_thumbnail_service.dart</code> + <code>page_selector_grid.dart</code> + <code>pro_gate.dart</code>. Test PageThumbnailService in isolation with a known PDF before connecting to any UI.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Extend PdfService (all 5 organize functions)</div>
+          <div class="step-detail">Add split, extractPages, deletePages, rotatePages, reorderPages to <code>pdf_service.dart</code>. Write a quick Dart unit test for each using 2 pre-made test PDFs. All 5 must produce valid PDF output before moving on.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">New Services (Group — can parallel)</div>
+          <div class="step-detail">Build <code>convert_service.dart</code> + <code>extract_service.dart</code> + <code>compress_service.dart</code> + <code>security_service.dart</code> (stub). Test each service function in isolation before connecting UI.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Organize UI Pages (Group — can parallel)</div>
+          <div class="step-detail">Build all 5 organize pages: split, extract_pages, reorder, delete, rotate. All depend on <code>PageSelectorGrid</code> (built in Step 2). Connect to their PdfService functions.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <div class="step-title">Convert UI Pages (Group — can parallel)</div>
+          <div class="step-detail">Build pdf_to_images, images_to_pdf, ocr pages. Wrap ocr_page in ProGate. Connect to ConvertService.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-content">
+          <div class="step-title">Extract & Optimize UI Pages (Group — can parallel)</div>
+          <div class="step-detail">Build extract_images, extract_text, compress pages. Wrap compress_page in ProGate. Connect to ExtractService and CompressService.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">8</div>
+        <div class="step-content">
+          <div class="step-title">Security Stub Page</div>
+          <div class="step-detail">Build the polished <code>security_page.dart</code> Coming Soon screen. Takes 20 minutes. Polish it properly.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">9</div>
+        <div class="step-content">
+          <div class="step-title">Update main.dart Routes + tools_page.dart Grid</div>
+          <div class="step-detail">Add all routes to the route table. Update tools_page to full categorized grid. <span class="hl">This step is last because it references all page files — they must exist.</span></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">10</div>
+        <div class="step-content">
+          <div class="step-title">Full Test Matrix on Physical Device</div>
+          <div class="step-detail">Execute every row in Section 08's test matrix. Fix crashes and visual glitches only. No new features.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">11</div>
+        <div class="step-content">
+          <div class="step-title">Release Build</div>
+          <div class="step-detail"><code>flutter build apk --release --target-platform android-arm64</code>. Install release APK (not debug) on demo device. Verify the complete demo loop one final time on the release build.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert warning">
+      <span class="alert-icon">⚠</span>
+      <div class="alert-body">
+        <div class="alert-title">File Contract Reminder — Zero Tolerance</div>
+        <div class="alert-text">
+          Every single output file from every service must land in the correct subdirectory:<br>
+          <code>AppDocuments/Oqba/documents/</code> — all output PDFs<br>
+          <code>AppDocuments/Oqba/extracted/</code> — all extracted images, text files, converted images<br>
+          <code>AppDocuments/Oqba/scans/</code> — raw scanner output (existing, do not change)<br>
+          <code>AppDocuments/Oqba/temp/</code> — intermediate processing files (always clean up after use)<br>
+          Never write to the system Downloads folder or any path outside these directories. Never pass external <code>content://</code> URIs to service functions.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- ── FOOTER ── -->
+<div style="background: var(--surface); border-top: 1px solid var(--border); padding: 40px 64px; display: flex; justify-content: space-between; align-items: center; margin-top: 0;">
+  <div>
+    <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--text);">Oqba <span style="color:var(--green)">عُقبة</span></div>
+    <div style="font-family:'Fira Code',monospace; font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.1em; margin-top:4px;">Production Implementation Brief · Agent Specification</div>
+  </div>
+  <div style="text-align:right; font-family:'Fira Code',monospace; font-size:11px; color:var(--text3); line-height:2; text-transform:uppercase; letter-spacing:0.08em;">
+    <div>11 Features · 4 Categories</div>
+    <div>13 New Pages · 6 Services</div>
+    <div>100% Offline · Privacy-First</div>
+  </div>
+</div>
+
+</body>
+</html>

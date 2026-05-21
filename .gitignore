@@ -1,0 +1,19 @@
+node_modules/
+.next/
+out/
+.env.local
+npm-debug.log*
+.idea/
+.vscode/
+flutter.zip
+app-release.apk
+
+# Flutter specific ignores for oqba/
+oqba/.dart_tool/
+oqba/build/
+oqba/.flutter-plugins
+oqba/.flutter-plugins-dependencies
+oqba/.packages
+oqba/android/**/*.apk
+oqba/android/**/*.aab
+oqba/ios/Flutter/Flutter.podspec

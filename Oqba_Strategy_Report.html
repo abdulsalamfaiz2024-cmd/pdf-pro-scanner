@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oqba — Hackathon Strategy Brief</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500&family=Literata:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --ink: #0c0b0f;
+  --paper: #f4f0e8;
+  --cream: #ede8dc;
+  --warm: #e8e0ce;
+  --rule: #c8bfaa;
+  --muted: #8c7f6c;
+  --red: #c0392b;
+  --amber: #b7670a;
+  --green: #1a6644;
+  --blue: #1a3a6e;
+  --code-bg: #1a1714;
+  --code-fg: #f0ead8;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Literata', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+/* Texture overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── COVER ── */
+.cover {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  border-bottom: 2px solid var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+
+.cover-bg-text {
+  position: absolute;
+  bottom: -40px;
+  right: -20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28vw;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(12,11,15,0.06);
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.02em;
+}
+
+.cover-inner {
+  padding: 80px 72px 60px;
+  max-width: 1000px;
+}
+
+.cover-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.cover-label::before {
+  content: '';
+  display: inline-block;
+  width: 32px;
+  height: 1px;
+  background: var(--muted);
+}
+
+.cover-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--red);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.cover-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(72px, 10vw, 128px);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.cover-title .arabic {
+  display: block;
+  color: var(--red);
+}
+
+.cover-title .english {
+  display: block;
+  color: var(--ink);
+}
+
+.cover-subtitle {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: clamp(18px, 2.5vw, 26px);
+  color: var(--muted);
+  margin-top: 20px;
+  max-width: 520px;
+  line-height: 1.4;
+}
+
+.cover-footer {
+  padding: 24px 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--rule);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.cover-footer-tags {
+  display: flex;
+  gap: 20px;
+}
+
+.verdict-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--rule);
+  border-left: 2px solid var(--ink);
+}
+
+.verdict-cell {
+  padding: 28px 32px;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.verdict-cell:last-child { border-right: none; }
+
+.v-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.v-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.v-value.red { color: var(--red); }
+.v-value.amber { color: var(--amber); }
+.v-value.green { color: var(--green); }
+.v-value.blue { color: var(--blue); }
+
+/* ── MAIN LAYOUT ── */
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 72px;
+}
+
+/* ── SECTION ── */
+.section {
+  padding: 80px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.section:last-child { border-bottom: none; }
+
+.section-header {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0;
+  align-items: start;
+  margin-bottom: 52px;
+}
+
+.section-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 72px;
+  line-height: 1;
+  color: var(--rule);
+  letter-spacing: -0.02em;
+  padding-top: 4px;
+}
+
+.section-meta { padding-left: 24px; border-left: 1px solid var(--rule); }
+
+.section-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.section-lead {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--muted);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+/* ── CONTENT BLOCKS ── */
+.block { margin-bottom: 36px; }
+
+.block-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.block-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+p {
+  color: #2a2520;
+  margin-bottom: 14px;
+}
+p:last-child { margin-bottom: 0; }
+
+/* ── DECISION TABLE ── */
+.decision-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin: 24px 0;
+  background: var(--rule);
+  border: 1px solid var(--ink);
+}
+
+.decision-col {
+  background: var(--paper);
+  padding: 28px;
+}
+
+.decision-col-header {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.decision-col-header.keep { color: var(--green); }
+.decision-col-header.cut { color: var(--red); }
+
+.decision-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+
+.decision-item:last-child { margin-bottom: 0; }
+
+.d-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  margin-top: 3px;
+  font-weight: bold;
+}
+
+.d-icon.keep { background: rgba(26,102,68,0.12); color: var(--green); }
+.d-icon.cut { background: rgba(192,57,43,0.1); color: var(--red); }
+
+.d-content {}
+
+.d-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.d-reason {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── RISK CARDS ── */
+.risk-list { display: flex; flex-direction: column; gap: 16px; margin: 24px 0; }
+
+.risk-card {
+  border: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 6px 1fr;
+}
+
+.risk-card .risk-bar { background: var(--red); }
+.risk-card.medium .risk-bar { background: var(--amber); }
+.risk-card.low .risk-bar { background: var(--green); }
+
+.risk-body { padding: 20px 24px; }
+
+.risk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.risk-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+
+.risk-level {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.risk-level.high { background: rgba(192,57,43,0.1); color: var(--red); }
+.risk-level.medium { background: rgba(183,103,10,0.1); color: var(--amber); }
+.risk-level.low { background: rgba(26,102,68,0.1); color: var(--green); }
+
+.risk-desc { font-size: 14px; color: #3a342c; margin-bottom: 10px; }
+
+.risk-rule {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  background: var(--cream);
+  border-left: 2px solid var(--ink);
+  padding: 10px 14px;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.risk-rule strong { color: var(--red); }
+
+/* ── TECH STACK TABLE ── */
+.stack-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 13px;
+}
+
+.stack-table th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--ink);
+  border-top: 1px solid var(--ink);
+  background: var(--cream);
+}
+
+.stack-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+  color: #2a2520;
+  line-height: 1.5;
+}
+
+.stack-table tr:hover td { background: var(--cream); }
+
+.badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-weight: 500;
+}
+
+.badge-danger { background: rgba(192,57,43,0.1); color: var(--red); border: 1px solid rgba(192,57,43,0.2); }
+.badge-upgrade { background: rgba(183,103,10,0.1); color: var(--amber); border: 1px solid rgba(183,103,10,0.2); }
+.badge-keep { background: rgba(26,102,68,0.1); color: var(--green); border: 1px solid rgba(26,102,68,0.2); }
+.badge-new { background: rgba(26,58,110,0.1); color: var(--blue); border: 1px solid rgba(26,58,110,0.2); }
+
+/* ── WOW FEATURES ── */
+.wow-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--rule);
+  border: 1px solid var(--ink);
+  margin: 24px 0;
+}
+
+.wow-card {
+  background: var(--paper);
+  padding: 28px 24px;
+}
+
+.wow-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  line-height: 1;
+  color: var(--rule);
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+
+.wow-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.wow-effort {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--green);
+  margin-bottom: 10px;
+  letter-spacing: 0.06em;
+}
+
+.wow-desc { font-size: 13.5px; color: #3a342c; line-height: 1.6; }
+
+.wow-impact {
+  margin-top: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--cream);
+  padding: 8px 12px;
+  border-left: 2px solid var(--amber);
+  line-height: 1.5;
+}
+
+/* ── TIMELINE ── */
+.timeline { position: relative; margin: 32px 0; }
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 44px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--rule);
+}
+
+.tl-item {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 0;
+  margin-bottom: 8px;
+}
+
+.tl-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+  padding-right: 20px;
+  padding-top: 18px;
+  line-height: 1.2;
+}
+
+.tl-body {
+  border: 1px solid var(--rule);
+  padding: 16px 20px;
+  margin-left: 20px;
+  position: relative;
+  background: var(--paper);
+}
+
+.tl-body::before {
+  content: '';
+  position: absolute;
+  left: -25px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.tl-body.critical { border-color: var(--red); background: rgba(192,57,43,0.03); }
+.tl-body.critical::before { background: var(--red); box-shadow: 0 0 0 1px var(--red); }
+
+.tl-body.warning { border-color: var(--amber); }
+.tl-body.warning::before { background: var(--amber); box-shadow: 0 0 0 1px var(--amber); }
+
+.tl-phase {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.tl-action {
+  font-family: 'Literata', serif;
+  font-size: 14.5px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.tl-flag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--cream);
+}
+
+.tl-flag.red { color: var(--red); border-left: 2px solid var(--red); }
+.tl-flag.amber { color: var(--amber); border-left: 2px solid var(--amber); }
+
+/* ── DEMO SCRIPT ── */
+.script-box {
+  border: 2px solid var(--ink);
+  margin: 24px 0;
+  background: var(--cream);
+}
+
+.script-header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 14px 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.script-body { padding: 32px; }
+
+.script-beat {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--rule);
+  align-items: start;
+}
+
+.script-beat:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+
+.beat-time {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.beat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.beat-content {}
+
+.beat-action {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--blue);
+  margin-bottom: 6px;
+}
+
+.beat-line {
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.65;
+  font-style: italic;
+  font-family: 'Instrument Serif', serif;
+}
+
+.beat-note {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--warm);
+  border-left: 2px solid var(--amber);
+}
+
+/* ── PULLQUOTE ── */
+.pullquote {
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding: 32px 0;
+  margin: 36px 0;
+}
+
+.pullquote p {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: clamp(20px, 2.8vw, 28px);
+  line-height: 1.4;
+  color: var(--ink);
+  margin: 0;
+}
+
+.pullquote cite {
+  display: block;
+  margin-top: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-style: normal;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* ── CRITICAL BOX ── */
+.critical-box {
+  border: 1px solid var(--red);
+  background: rgba(192,57,43,0.04);
+  padding: 24px 28px;
+  margin: 28px 0;
+}
+
+.critical-box-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--red);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.critical-box p { color: #3a2520; }
+
+/* ── RULE LIST ── */
+.rule-list { list-style: none; margin: 16px 0; display: flex; flex-direction: column; gap: 10px; }
+
+.rule-list li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  font-size: 14.5px;
+  color: #2a2520;
+  line-height: 1.6;
+}
+
+.rule-num {
+  flex-shrink: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 2px 6px;
+  margin-top: 3px;
+}
+
+/* ── FOOTER ── */
+.doc-footer {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 48px 72px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 0;
+}
+
+.footer-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 0.02em;
+}
+
+.footer-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(244,240,232,0.4);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.footer-meta {
+  text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(244,240,232,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 2;
+}
+
+/* ── REVISED TIMELINE ── */
+.revised-header {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 0;
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 0;
+}
+
+.revised-header span:last-child { padding-left: 20px; border-left: none; margin-left: 20px; }
+
+/* responsive */
+@media (max-width: 700px) {
+  .page { padding: 0 24px; }
+  .cover-inner { padding: 40px 24px 40px; }
+  .cover-footer { padding: 20px 24px; flex-direction: column; gap: 12px; align-items: flex-start; }
+  .decision-grid, .wow-grid { grid-template-columns: 1fr; }
+  .verdict-strip { grid-template-columns: 1fr 1fr; }
+  .section-header { grid-template-columns: 1fr; }
+  .section-num { font-size: 48px; }
+  .doc-footer { padding: 36px 24px; flex-direction: column; gap: 24px; align-items: flex-start; }
+  .doc-footer .footer-meta { text-align: left; }
+}
+
+/* stagger animation */
+.section { opacity: 0; animation: rise 0.7s ease forwards; }
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.12s; }
+.section:nth-child(3) { animation-delay: 0.19s; }
+.section:nth-child(4) { animation-delay: 0.26s; }
+.section:nth-child(5) { animation-delay: 0.33s; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ COVER ═══════════════════════════ -->
+<div class="cover">
+  <div class="cover-bg-text">عُقبة</div>
+  <div class="cover-inner">
+    <div class="cover-label">Confidential — Strategic Brief</div>
+    <div class="cover-eyebrow">Hackathon Strategy &amp; Stress-Test Report</div>
+    <h1 class="cover-title">
+      <span class="arabic">عُقبة</span>
+      <span class="english">OQBA</span>
+    </h1>
+    <p class="cover-subtitle">A ruthless, product-minded blueprint to win a 24-hour developer challenge with a 100% offline PDF scanner and document toolkit.</p>
+  </div>
+
+  <div>
+    <div class="verdict-strip">
+      <div class="verdict-cell">
+        <div class="v-label">Plan Viability</div>
+        <div class="v-value amber">60%</div>
+      </div>
+      <div class="verdict-cell">
+        <div class="v-label">Critical Stack Flaw</div>
+        <div class="v-value red">1 Found</div>
+      </div>
+      <div class="verdict-cell">
+        <div class="v-label">Scope Risk</div>
+        <div class="v-value red">High</div>
+      </div>
+      <div class="verdict-cell">
+        <div class="v-label">Win Probability (post-fix)</div>
+        <div class="v-value green">85%+</div>
+      </div>
+    </div>
+    <div class="cover-footer">
+      <span>Prepared for: Oqba Development Team</span>
+      <div class="cover-footer-tags">
+        <span>Product Strategy</span>
+        <span>·</span>
+        <span>Risk Analysis</span>
+        <span>·</span>
+        <span>Demo Coaching</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
+<div class="page">
+
+  <!-- ─── SECTION 1: SCOPE ─── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div class="section-meta">
+        <div class="section-tag">MVP Scope &amp; Ruthless Prioritization</div>
+        <h2 class="section-title">TRIM THE FAT.<br>OWN ONE THING.</h2>
+        <p class="section-lead">Your plan tries to ship six features in 24 hours. Every extra feature you add halves your demo quality. The judges will remember one flawless experience — not six mediocre ones.</p>
+      </div>
+    </div>
+
+    <div class="pullquote">
+      <p>"A great MVP is not a small version of a product. It is the sharpest possible proof that your core idea works. In a hackathon, your hero feature IS the product."</p>
+      <cite>Strategic Principle</cite>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Feature Verdict</div>
+      <div class="decision-grid">
+        <div class="decision-col">
+          <div class="decision-col-header keep">✓ Keep — Non-Negotiable</div>
+
+          <div class="decision-item">
+            <div class="d-icon keep">✓</div>
+            <div class="d-content">
+              <div class="d-name">Document Scanner (Camera → PDF)</div>
+              <div class="d-reason">Your hero feature and the entire technical narrative. Without this, you have a file manager. Do not compromise on its smoothness.</div>
+            </div>
+          </div>
+
+          <div class="decision-item">
+            <div class="d-icon keep">✓</div>
+            <div class="d-content">
+              <div class="d-name">Merge PDF</div>
+              <div class="d-reason">Highest perceived utility. Takes 5 minutes to implement with the right library. A crowd-pleaser in every demo.</div>
+            </div>
+          </div>
+
+          <div class="decision-item">
+            <div class="d-icon keep">✓</div>
+            <div class="d-content">
+              <div class="d-name">Dark Mode UI + Empty States</div>
+              <div class="d-reason">This is your first impression. Judges form an opinion in 8 seconds. A premium, polished shell around two working features beats a rough shell around six.</div>
+            </div>
+          </div>
+
+          <div class="decision-item">
+            <div class="d-icon keep">✓</div>
+            <div class="d-content">
+              <div class="d-name">File Size Display (post-action)</div>
+              <div class="d-reason">Add this to every operation result. "Merged 2 files → 1.2 MB" is concrete proof that something happened. Zero effort, massive credibility.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-col">
+          <div class="decision-col-header cut">✗ Cut — Time Traps</div>
+
+          <div class="decision-item">
+            <div class="d-icon cut">✗</div>
+            <div class="d-content">
+              <div class="d-name">Split / Extract Pages</div>
+              <div class="d-reason">Complex UI (page pickers, range selectors). Judges won't notice its absence if your Scanner and Merge are flawless. Cut without guilt.</div>
+            </div>
+          </div>
+
+          <div class="decision-item">
+            <div class="d-icon cut">✗</div>
+            <div class="d-content">
+              <div class="d-name">Delete Pages</div>
+              <div class="d-reason">Requires building a page thumbnail viewer — a feature that alone could eat 4 hours. This is a v1.1 feature.</div>
+            </div>
+          </div>
+
+          <div class="decision-item">
+            <div class="d-icon cut">✗</div>
+            <div class="d-content">
+              <div class="d-name">Settings Page</div>
+              <div class="d-reason">Judges will not navigate to Settings. An empty or placeholder Settings screen is worse than no Settings. Replace with a static "About Oqba" screen that reinforces your privacy pitch.</div>
+            </div>
+          </div>
+
+          <div class="decision-item">
+            <div class="d-icon cut">✗</div>
+            <div class="d-content">
+              <div class="d-name">Rotate Pages</div>
+              <div class="d-reason">Lowest ROI tool in your list. If you have spare hours after polish, add it. Otherwise, remove it from the Tools grid entirely for a cleaner layout.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="critical-box">
+      <div class="critical-box-title">⚑ Strategic Directive</div>
+      <p>Your demo loop must be a perfect closed circle: <strong>Open app → Scan a document → App auto-saves as a PDF → Go to Tools → Merge that PDF with one other → Show the merged output.</strong> If this loop is flawless, you win. Every other feature is decoration.</p>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 2: STACK ─── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div class="section-meta">
+        <div class="section-tag">Architecture &amp; Tooling Strategy</div>
+        <h2 class="section-title">ONE CRITICAL FLAW<br>IN YOUR STACK.</h2>
+        <p class="section-lead">Your framework choice is sound. Your scanner library choices are acceptable. But there is a dangerous gap in your PDF manipulation plan that will cause you to hit a wall at Hour 12.</p>
+      </div>
+    </div>
+
+    <div class="critical-box">
+      <div class="critical-box-title">⚑ Critical Flaw Identified: The PDF Library Gap</div>
+      <p>The Flutter <code style="font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--warm);padding:2px 5px;">pdf</code> package listed in your plan is a <strong>PDF creation library</strong> — it builds PDFs from scratch using widgets. It cannot open, read, or manipulate <em>existing</em> PDF files. This means your Merge and all future PDF tools will fail entirely at Hour 12 when you try to merge real files the user scanned. This single error could eliminate you from the competition.</p>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Revised Stack Recommendation</div>
+      <table class="stack-table">
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>Original Plan</th>
+            <th>Verdict</th>
+            <th>Recommended Alternative</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Framework</strong></td>
+            <td>Flutter (Dart)</td>
+            <td><span class="badge badge-keep">Keep</span></td>
+            <td>Flutter — confirmed</td>
+            <td>Native performance, single codebase, rich package ecosystem. Correct choice.</td>
+          </tr>
+          <tr>
+            <td><strong>Scanner SDK</strong></td>
+            <td>cunning_document_scanner</td>
+            <td><span class="badge badge-upgrade">Upgrade</span></td>
+            <td><strong>google_mlkit_document_scanner</strong></td>
+            <td>Wraps Google ML Kit's on-device Document Scanner API. Handles edge detection, perspective correction, and image enhancement natively. More actively maintained, better Android consistency, and it's 100% offline by design since ML Kit models ship bundled.</td>
+          </tr>
+          <tr>
+            <td><strong>PDF Manipulation</strong></td>
+            <td><code style="font-family:'IBM Plex Mono',monospace;font-size:12px;">pdf</code> package</td>
+            <td><span class="badge badge-danger">Replace</span></td>
+            <td><strong>syncfusion_flutter_pdf</strong></td>
+            <td>Can load, read, merge, split, and write existing PDF files — exactly what you need. The community license is free. This is the correct library for PDF manipulation vs. the pdf package which only creates PDFs from widgets.</td>
+          </tr>
+          <tr>
+            <td><strong>State Management</strong></td>
+            <td>Provider or Riverpod</td>
+            <td><span class="badge badge-upgrade">Simplify</span></td>
+            <td><strong>setState only</strong></td>
+            <td>In a 24-hour window, setting up Riverpod providers, notifiers, and async states is a time sink. Use simple <code style="font-family:'IBM Plex Mono',monospace;font-size:12px;">setState</code> for this MVP. You can refactor after the demo. Don't architecture-astronaut yourself out of a win.</td>
+          </tr>
+          <tr>
+            <td><strong>File System</strong></td>
+            <td>path_provider + file_picker</td>
+            <td><span class="badge badge-keep">Keep</span></td>
+            <td>As planned — confirmed</td>
+            <td>This combination is the industry standard and well-tested. No changes needed.</td>
+          </tr>
+          <tr>
+            <td><strong>React Native Alt.</strong></td>
+            <td>pdf-lib</td>
+            <td><span class="badge badge-keep">Keep (if RN)</span></td>
+            <td>pdf-lib — confirmed</td>
+            <td>If you go the React Native route, pdf-lib is the correct choice. It handles real PDF manipulation in JavaScript. The RN scanner plugin choice is acceptable but test it on a physical device on Day 1, not Hour 6.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Golden Architecture Rule for Offline Apps</div>
+      <p>Structure your app around a <strong>local file-system contract</strong> from Hour 1. Define one standard path where all scanned and managed PDFs live (e.g., <code style="font-family:'IBM Plex Mono',monospace;font-size:12px;">AppDocuments/Oqba/</code>). Every feature reads from and writes to this single location. This prevents the silent failure where your scanner saves to a temp cache but your PDF merger looks in the documents folder and finds nothing — a common and devastating demo failure.</p>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 3: RISK ─── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div class="section-meta">
+        <div class="section-tag">Risk Mitigation — Crash Prevention</div>
+        <h2 class="section-title">THE FIVE THINGS<br>THAT WILL KILL<br>YOUR DEMO.</h2>
+        <p class="section-lead">Offline image and PDF processing has specific, well-known failure points. Here are the five architectural threats ranked by probability and the strategic rule to neutralize each one before your live demo.</p>
+      </div>
+    </div>
+
+    <div class="risk-list">
+      <div class="risk-card">
+        <div class="risk-bar"></div>
+        <div class="risk-body">
+          <div class="risk-header">
+            <span class="risk-name">Memory Exhaustion on Large PDFs</span>
+            <span class="risk-level high">High Risk</span>
+          </div>
+          <p class="risk-desc">Loading a multi-page scanned PDF entirely into memory to merge it is the most common crash vector in PDF apps. A 20-page scanned document at high resolution can be 40–80MB. Loading two of them simultaneously for a merge operation can easily exceed device memory limits, causing an immediate silent kill of your app.</p>
+          <div class="risk-rule"><strong>Strategic Rule:</strong> Never load the full byte contents of a PDF into a single in-memory variable. Use your PDF library's stream-based or page-by-page APIs. Process pages sequentially and release each one. For your demo, control the narrative — use a pre-prepared PDF of 3–5 pages. There is no rule that says the judge's file must be used.</div>
+        </div>
+      </div>
+
+      <div class="risk-card">
+        <div class="risk-bar"></div>
+        <div class="risk-body">
+          <div class="risk-header">
+            <span class="risk-name">Camera &amp; Storage Permissions Crash</span>
+            <span class="risk-level high">High Risk</span>
+          </div>
+          <p class="risk-desc">On Android 13+ and iOS 14+, permissions are granular, revocable, and dialog-based. If your app requests camera permission after it has already been denied once, it will silently fail or show a broken UI. This is the single most common cause of demo failures in scanner apps.</p>
+          <div class="risk-rule"><strong>Strategic Rule:</strong> Build a dedicated "Permissions Gate" screen. Before launching the camera, always check the permission status first. If denied, show a clear in-app message with a button that opens the device's Settings app — never leave the user on a blank screen. Test this on a physical device with permissions denied. Test it on two physical devices: one Android, one iOS.</div>
+        </div>
+      </div>
+
+      <div class="risk-card medium">
+        <div class="risk-bar"></div>
+        <div class="risk-body">
+          <div class="risk-header">
+            <span class="risk-name">Plugin Version Conflicts at Build Time</span>
+            <span class="risk-level medium">Medium Risk</span>
+          </div>
+          <p class="risk-desc">Flutter's pub.dev ecosystem has dependency conflicts. Adding a new scanner plugin often pins certain versions of Kotlin or Gradle that conflict with other plugins. This can surface as a build error at Hour 6 that costs you 2–3 hours to debug.</p>
+          <div class="risk-rule"><strong>Strategic Rule:</strong> Install ALL plugins in Hour 0–1, before writing a single line of UI code. Run a test build immediately. If the build is green, commit it as your "safe baseline." This way you discover conflicts before you've written code that depends on them, and rolling back is painless.</div>
+        </div>
+      </div>
+
+      <div class="risk-card medium">
+        <div class="risk-bar"></div>
+        <div class="risk-body">
+          <div class="risk-header">
+            <span class="risk-name">File Path Inconsistency (iOS vs Android)</span>
+            <span class="risk-level medium">Medium Risk</span>
+          </div>
+          <p class="risk-desc">iOS sandboxing and Android scoped storage use fundamentally different path structures. A file path returned by your scanner plugin on Android is often a content URI (e.g., <code style="font-family:'IBM Plex Mono',monospace;font-size:12px;">content://media/...</code>), not a real file path. Passing this directly to your PDF library will cause a "file not found" crash that looks confusing and is hard to diagnose under pressure.</p>
+          <div class="risk-rule"><strong>Strategic Rule:</strong> Immediately after scanning or picking any file, copy it to your app's internal documents directory and work with that internal copy exclusively. Never pass external URIs or cache paths to your PDF processing functions. This single rule prevents 90% of cross-platform file handling crashes.</div>
+        </div>
+      </div>
+
+      <div class="risk-card low">
+        <div class="risk-bar"></div>
+        <div class="risk-body">
+          <div class="risk-header">
+            <span class="risk-name">UI Freezing During Processing</span>
+            <span class="risk-level low">Low Risk (High Impact)</span>
+          </div>
+          <p class="risk-desc">Performing PDF manipulation on the main UI thread will freeze the app for 1–3 seconds depending on file size. The app won't crash, but a frozen UI during a live demo looks like a crash to every person watching.</p>
+          <div class="risk-rule"><strong>Strategic Rule:</strong> Wrap every PDF operation in an async function and show a loading indicator before it starts. In Flutter, use a simple <code style="font-family:'IBM Plex Mono',monospace;font-size:12px;">compute()</code> call or an isolate to move the heavy work off the main thread. The loading indicator makes processing feel intentional and fast — not broken.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 4: WOW ─── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div class="section-meta">
+        <div class="section-tag">The "Wow" Factor — High-ROI UX</div>
+        <h2 class="section-title">THREE TRICKS THAT<br>MAKE JUDGES LEAN IN.</h2>
+        <p class="section-lead">These are not cosmetic features. They are psychological tools. Each one takes under 30 minutes and will be remembered far more than a fourth PDF tool.</p>
+      </div>
+    </div>
+
+    <div class="wow-grid">
+      <div class="wow-card">
+        <div class="wow-num">01</div>
+        <div class="wow-name">The Speed Receipt</div>
+        <div class="wow-effort">⏱ Implementation: ~20 minutes</div>
+        <p class="wow-desc">After every operation (scan, merge, whatever) display a small "operation complete" banner that shows the processing time in milliseconds — e.g., <strong>"Merged in 340ms · Offline"</strong>. This does two things simultaneously: it proves your app is fast and it proves it is offline. Judges who might not fully grasp the technical difficulty of offline PDF processing will see "Offline" stamped on every result and understand instantly.</p>
+        <div class="wow-impact">Psychological trigger: Concrete numbers signal engineering rigor. "Fast" is vague. "340ms" is a proof point.</div>
+      </div>
+
+      <div class="wow-card">
+        <div class="wow-num">02</div>
+        <div class="wow-name">Haptic Scan Shutter</div>
+        <div class="wow-effort">⏱ Implementation: ~10 minutes</div>
+        <p class="wow-desc">Trigger a medium haptic feedback pulse at the exact moment a document is captured. This is a single function call in both Flutter and React Native. Judges watching a live demo will feel the app respond to the physical action of scanning. It transforms a software button press into a tactile, physical experience — exactly like a professional camera shutter. It makes the app feel premium without any visual effort.</p>
+        <div class="wow-impact">Psychological trigger: Haptics bypass visual attention. The judge feels the quality before they see it. It creates a memory.</div>
+      </div>
+
+      <div class="wow-card">
+        <div class="wow-num">03</div>
+        <div class="wow-name">The Privacy Heartbeat</div>
+        <div class="wow-effort">⏱ Implementation: ~25 minutes</div>
+        <p class="wow-desc">Add a subtle, permanently visible indicator in your app's top bar — a small icon or a single-word label that reads <strong>"Offline"</strong> or <strong>"Private"</strong> with a soft pulsing animation. This keeps your core differentiator visible at all times. When you're pitching, you don't have to tell the judges the app is private — they can see it on screen the entire time. The feature markets itself passively and continuously throughout the demo.</p>
+        <div class="wow-impact">Psychological trigger: Repetition and visibility. The message "this is private" is reinforced every second the app is on screen, not just when you mention it verbally.</div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">One Additional Micro-Touch Worth Noting</div>
+      <p>Replace generic loading spinners with a skeleton loader on your home file list. When the app loads and reads the local file system, instead of a spinner, show ghost-gray placeholder cards in the shape of file items. This takes 30 extra minutes but makes the app feel dramatically more polished and production-ready — the difference between a hackathon prototype and a real product.</p>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 5: REVISED TIMELINE ─── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div class="section-meta">
+        <div class="section-tag">Revised Execution Blueprint</div>
+        <h2 class="section-title">YOUR CORRECTED<br>24-HOUR SCHEDULE.</h2>
+        <p class="section-lead">The original timeline has a fatal flaw: it leaves integration and wiring to Hours 14–18, which is too late. The revised plan front-loads all integration risk so you discover problems early, while you still have time to recover.</p>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-time">Hr 0–1</div>
+        <div class="tl-body critical">
+          <div class="tl-phase">Phase 1 — Foundation</div>
+          <div class="tl-action">Create project. Install ALL plugins immediately (scanner, PDF library, file picker, path provider). Run a test build on a physical device. Commit as "Baseline Build." Do not write any UI yet.</div>
+          <div class="tl-flag red">⚑ Critical: If your build is broken here, you fix it now — not at Hour 12 when you're exhausted.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-time">Hr 1–3</div>
+        <div class="tl-body">
+          <div class="tl-phase">Phase 2 — Scanner Integration</div>
+          <div class="tl-action">Integrate the scanner plugin first — before UI. Get the camera open and a captured image saved to the app's internal directory. This is your highest-risk integration and must be validated early. Once it saves an image, immediately convert it to a PDF and confirm the file exists on disk.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-time">Hr 3–5</div>
+        <div class="tl-body critical">
+          <div class="tl-phase">Phase 3 — PDF Logic Core</div>
+          <div class="tl-action">Build and test the Merge function using syncfusion_flutter_pdf. Test it with two real dummy PDF files you pre-create. Confirm the output file is valid and can be opened. This must work perfectly before you build any UI around it.</div>
+          <div class="tl-flag red">⚑ Critical: Both scanner and PDF merge must be working in isolation by Hour 5. If either is broken, you have time to switch libraries or adapt.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-time">Hr 5–9</div>
+        <div class="tl-body">
+          <div class="tl-phase">Phase 4 — UI Shell</div>
+          <div class="tl-action">Build the UI with hardcoded placeholder data. Home screen with file list (skeleton loaders), Tools grid showing only Scan and Merge, the "About / Privacy" screen. Keep the design focused and premium. Dark mode, clean typography, generous spacing.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-time">Hr 9–13</div>
+        <div class="tl-body">
+          <div class="tl-phase">Phase 5 — Wiring</div>
+          <div class="tl-action">Connect the UI to your working logic. Scan button → scanner → save to app directory → refresh home screen file list. Merge button → file picker → select two PDFs → merge function → save output → show success with file size and processing time.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-time">Hr 13–17</div>
+        <div class="tl-body warning">
+          <div class="tl-phase">Phase 6 — Polish &amp; Wow Factors</div>
+          <div class="tl-action">Add haptic feedback on scan. Add the processing time + "Offline" badge to all success states. Add the permanent "Offline" indicator to the top bar with its subtle animation. Add permission handling flows. Add error toasts for edge cases.</div>
+          <div class="tl-flag amber">⚡ This phase is where you transform a functional app into a winning one. Protect this time aggressively.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-time">Hr 17–21</div>
+        <div class="tl-body">
+          <div class="tl-phase">Phase 7 — Device Testing</div>
+          <div class="tl-action">Test the full demo loop end-to-end on a physical device a minimum of ten times without touching the code. Use real documents — a receipt, a page from a book, a printed form. Fix only crashes and visual glitches. Feature additions are completely banned in this phase.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-time">Hr 21–24</div>
+        <div class="tl-body">
+          <div class="tl-phase">Phase 8 — Demo Prep</div>
+          <div class="tl-action">Build the release APK. Pre-load two documents onto the demo device. Rehearse the 60-second pitch five times. Prepare a backup device with the app installed. Sleep or rest if possible — a sharp presenter beats a polished app.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 6: DEMO SCRIPT ─── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div class="section-meta">
+        <div class="section-tag">Winning Demo Strategy</div>
+        <h2 class="section-title">THE 60-SECOND<br>PITCH SCRIPT.</h2>
+        <p class="section-lead">A demo is not a tour of features. It is a story with a villain, a hero, and a resolution. Your villain is surveillance capitalism and cloud dependency. Your hero is Oqba. Here is how you tell that story in exactly 60 seconds.</p>
+      </div>
+    </div>
+
+    <div class="script-box">
+      <div class="script-header">
+        <span>Live Demo Script — Oqba (عُقبة)</span>
+        <span>Target: 60 seconds · Device in hand</span>
+      </div>
+      <div class="script-body">
+        <div class="script-beat">
+          <div>
+            <div class="beat-time">0:00</div>
+            <div class="beat-label">seconds</div>
+          </div>
+          <div class="beat-content">
+            <div class="beat-action">Hook — Establish the problem</div>
+            <p class="beat-line">"Every time you scan a document with your phone, it uploads to someone's server. Google Drive. Adobe. iCloud. Your contracts, your invoices, your medical records — on a stranger's cloud. Oqba was built in 24 hours to make that choice disappear."</p>
+            <div class="beat-note">Do not look at the phone yet. Make eye contact. Let the problem land.</div>
+          </div>
+        </div>
+
+        <div class="script-beat">
+          <div>
+            <div class="beat-time">0:12</div>
+            <div class="beat-label">seconds</div>
+          </div>
+          <div class="beat-content">
+            <div class="beat-action">Live action — Scan a document</div>
+            <p class="beat-line">"This is Oqba. Notice this indicator" — point to the Offline badge — "the app has no internet permission. Not limited internet. None. Let me scan this document right now."</p>
+            <div class="beat-note">Open the scanner. Let the edge detection do its work visibly. Capture. The haptic fires. A beat of silence.</div>
+          </div>
+        </div>
+
+        <div class="script-beat">
+          <div>
+            <div class="beat-time">0:25</div>
+            <div class="beat-label">seconds</div>
+          </div>
+          <div class="beat-content">
+            <div class="beat-action">Proof — Show the result</div>
+            <p class="beat-line">"Scanned, edge-corrected, and saved as a PDF in" — read the timer — "428 milliseconds. Entirely on this device. It never left this phone."</p>
+            <div class="beat-note">Turn the screen toward the judges. Let them see the file list update. Show the file size.</div>
+          </div>
+        </div>
+
+        <div class="script-beat">
+          <div>
+            <div class="beat-time">0:35</div>
+            <div class="beat-label">seconds</div>
+          </div>
+          <div class="beat-content">
+            <div class="beat-action">Second act — Merge demo</div>
+            <p class="beat-line">"Now I'll merge this with a second document." — tap Merge, select both files, tap confirm — "Done. Two separate PDFs, one combined output, in under half a second. No upload. No login. No subscription."</p>
+          </div>
+        </div>
+
+        <div class="script-beat">
+          <div>
+            <div class="beat-time">0:50</div>
+            <div class="beat-label">seconds</div>
+          </div>
+          <div class="beat-content">
+            <div class="beat-action">Close — The technical difficulty statement</div>
+            <p class="beat-line">"The hard part was not building a scanner. The hard part was building a full document processing pipeline — edge detection, PDF generation, file merging — that runs entirely inside the device, with no cloud infrastructure, in 24 hours. Oqba proves it's possible. This is just the beginning."</p>
+            <div class="beat-note">Put the phone down. Stop talking. The silence after a confident close is more powerful than anything else you could add.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Three Cardinal Demo Rules</div>
+      <ul class="rule-list">
+        <li>
+          <span class="rule-num">01</span>
+          <span><strong>Never ask permission to demo.</strong> Do not say "so I'm going to show you how to scan something." Just scan something. Confidence in action communicates more than confidence in words.</span>
+        </li>
+        <li>
+          <span class="rule-num">02</span>
+          <span><strong>Pre-load a document on the device.</strong> Have one scanned PDF already saved in the app before you walk in. This gives you a guaranteed fallback — if the live scan fails for any reason (bad lighting, camera freeze), you can pivot instantly to "I've already scanned one here, let me show you the merge" without breaking the demo's momentum.</span>
+        </li>
+        <li>
+          <span class="rule-num">03</span>
+          <span><strong>Say "offline" every time the app says "offline."</strong> Each time the Offline indicator is visible and you're speaking, say the word "offline" out loud. Repetition is a persuasion tool. By the end of 60 seconds, the word should be anchored in every judge's mind as the defining characteristic of Oqba.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<div class="doc-footer">
+  <div>
+    <div class="footer-title">عُقبة — OQBA</div>
+    <div class="footer-sub">Hackathon Strategy Brief · Confidential</div>
+  </div>
+  <div class="footer-meta">
+    <div>Sections: 06</div>
+    <div>Risk Items: 05</div>
+    <div>Critical Flaws Found: 01</div>
+    <div>Projected Win Rate: 85%+</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: Oqba PDF Tools Suite",
+  "description": "A comprehensive mobile suite for organizing, converting, and optimizing PDF documents with AI-powered OCR and scanning.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
