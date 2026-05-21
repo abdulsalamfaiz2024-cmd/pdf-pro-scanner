@@ -1,20 +1,52 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# PDF Pro Scanner - Web and Mobile Utility App
 
-# Run and deploy your AI Studio app
+A document utility suite consisting of a responsive React web interface and a cross-platform Flutter mobile application. This suite allows users to scan, organize, crop, and merge documents both online and offline.
 
-This contains everything you need to run your app locally.
+## Core Features
 
-View your app in AI Studio: https://ai.studio/apps/13153ee8-ae9a-4680-b871-34719dd2f9d8
+- **React Web Client**: Designed with modern web technologies, providing fast, client-side PDF merging, image cropping adjustments, and simple text recognition utility.
+- **Flutter Mobile Application**: A cross-platform mobile application supporting localized document directories, offline storage organization, and native device scanner integration.
+- **Document Optimization**: Automated scripts for page alignment and high-fidelity output.
 
-## Run Locally
+## Tech Stack
 
-**Prerequisites:**  Node.js
+- **Web Client**: React, Vite, TypeScript, Tailwind CSS
+- **Mobile Client**: Flutter, Dart, SQLite (local storage)
+- **Utilities**: Python scripts for asset optimization
 
+## Getting Started
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Web Client Setup
+
+1. Navigate to the web folder:
+   ```bash
+   cd web
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run locally:
+   ```bash
+   npm run dev
+   ```
+
+### Mobile Client Setup
+
+1. Make sure you have the Flutter SDK installed.
+2. Navigate to the mobile application directory:
+   ```bash
+   cd oqba
+   ```
+
+3. Install Dart packages:
+   ```bash
+   flutter pub get
+   ```
+
+4. Run on a simulator or physical device:
+   ```bash
+   flutter run
+   ```
